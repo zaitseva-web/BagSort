@@ -12,26 +12,12 @@
     <main>
         <p>Create list</p>
         <input type="text" id="list_name" placeholder="Enter list name...">
-        <!-- Кнопка для отправки -->
-        <button onclick="createList">Create</button>
+        <button type="button" id="create-list-button">Create</button>
 
         <p>Выберите список:</p>
         <ul class="lists">
-            <li>
-                <a class="list-card" href="#shopping-list">
-                    <span class="list-card__title">Список покупок</span>
-                    <span class="list-card__arrow" aria-hidden="true">&rarr;</span>
-                </a>
-            </li>
         </ul>
 
-        <section class="list-details" id="shopping-list">
-            <a class="back-link" href="#top">&larr; Назад к спискам</a>
-            <h2>Список покупок</h2>
-            <ul>
-                
-            </ul>
-        </section>
     </main>
     
     <script src="java/app.js"></script>

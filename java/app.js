@@ -1,14 +1,71 @@
-console.log("Приложение запущено");
+const listNameInput = document.getElementById("list_name");
+const createListButton = document.getElementById("create-list-button");
+const listsContainer = document.querySelector(".lists");
+const main = document.querySelector("main");
+const storageKey = "lists";
+let listNumber = 0;
 
-const list = document.querySelector(".list-card");
+function addList(listName) {
+  const listId = `list-${++listNumber}`;
+  const listItem = document.createElement("li");
+  const listLink = document.createElement("a");
+  listLink.className = "list-card";
+  listLink.href = `#${listNameInput}`;
 
-list.addEventListener("click", function () {
-    console.log("На список нажали");
+  const title = document.createElement("span");
+  title.className = "list-card__title";
+  title.textContent = listName;
+
+  const arrow = document.createElement("span");
+  arrow.className = "list-card__arrow";
+  arrow.setAttribute("aria-hidden", "true");
+  arrow.textContent = "→";
+
+  listLink.append(title, arrow);
+  listItem.append(listLink);
+  listsContainer.append(listItem);
+
+  const details = document.createElement("section");
+  details.className = "list-details";
+  details.id = listId;
+
+  const backLink = document.createElement("a");
+  backLink.className = "back-link";
+  backLink.href = "#top";
+  backLink.textContent = "← Назад к спискам";
+
+  const heading = document.createElement("h2");
+  heading.textContent = listName;
+
+  details.append(backLink, heading, document.createElement("ul"));
+  main.append(details);
+}
+
+let savedLists = [];
+try {
+  const storedLists = JSON.parse(localStorage.getItem(storageKey) || "[]");
+  if (Array.isArray(storedLists)) {
+    savedLists = storedLists.filter((name) => typeof name === "string");
+  }
+} catch {
+  savedLists = [];
+}
+
+savedLists.forEach(addList);
+
+createListButton.addEventListener("click", function () {
+  const listName = listNameInput.value.trim();
+
+  if (!listName) {
+    listNameInput.focus();
+    return;
+  }
+
+  addList(listName);
+  savedLists.push(listName);
+  localStorage.setItem(storageKey, JSON.stringify(savedLists));
+
+  listNameInput.value = "";
+  listNameInput.focus();
 });
 
-// create list
-let list_name = document.getElementById('list_name');
-
-list_name.addEventListener('list_name', function(event) {
-  console.log(event.target.value);
-});
