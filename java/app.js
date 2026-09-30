@@ -34,7 +34,7 @@ function addList(listName) {
   backLink.href = "#top";
   backLink.textContent = "← Назад к спискам";
 
-  const heading = document.createElement("h2");
+  const heading = document.createElement("p");
   heading.textContent = listName;
 
   details.append(backLink, heading, document.createElement("ul"));
