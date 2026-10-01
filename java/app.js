@@ -32,9 +32,10 @@ function addList(listName) {
   const backLink = document.createElement("a");
   backLink.className = "back-link";
   backLink.href = "#top";
-  backLink.textContent = "← Назад к спискам";
+  backLink.textContent = "← Назад к спискам ";
 
-  const heading = document.createElement("p");
+  const heading = document.createElement("a");
+  heading.href = `#${listNameInput}`;
   heading.textContent = listName;
 
   details.append(backLink, heading, document.createElement("ul"));
