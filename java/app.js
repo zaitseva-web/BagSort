@@ -1,16 +1,33 @@
 const listNameInput = document.getElementById("list_name");
 const createListButton = document.getElementById("create-list-button");
-const listsContainer = document.querySelector(".lists");
+const listsContainer = document.getElementById("lists");
 const main = document.querySelector("main");
 const storageKey = "lists";
 let listNumber = 0;
+
+function showListDetails(details) {
+  const allDetails = document.querySelectorAll(".list-details");
+  allDetails.forEach((section) => {
+    section.hidden = true;
+  });
+
+  details.hidden = false;
+  details.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 
 function addList(listName) {
   const listId = `list-${++listNumber}`;
   const listItem = document.createElement("li");
   const listLink = document.createElement("a");
   listLink.className = "list-card";
-  listLink.href = `#${listNameInput}`;
+  listLink.href = `#${listId}`;
+  listLink.addEventListener("click", (event) => {
+    event.preventDefault();
+    const details = document.getElementById(listId);
+    if (details) {
+      showListDetails(details);
+    }
+  });
 
   const title = document.createElement("span");
   title.className = "list-card__title";
@@ -28,17 +45,30 @@ function addList(listName) {
   const details = document.createElement("section");
   details.className = "list-details";
   details.id = listId;
+  details.hidden = true;
 
   const backLink = document.createElement("a");
   backLink.className = "back-link";
-  backLink.href = "#top";
-  backLink.textContent = "← Назад к спискам ";
+  backLink.href = "#lists";
+  backLink.textContent = "← Назад к спискам";
+  backLink.addEventListener("click", (event) => {
+    event.preventDefault();
+    details.hidden = true;
+    listsContainer.hidden = false;
+    listsContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
 
   const heading = document.createElement("a");
-  heading.href = `#${listNameInput}`;
+  heading.className = "list-details__heading";
+  heading.href = `#${listId}`;
   heading.textContent = listName;
+  heading.addEventListener("click", (event) => {
+    event.preventDefault();
+    showListDetails(details);
+  });
 
-  details.append(backLink, heading, document.createElement("ul"));
+  const listContent = document.createElement("ul");
+  details.append(backLink, heading, listContent);
   main.append(details);
 }
 
