@@ -6,3 +6,13 @@ h1 {
 .inside-list-title {
     margin-inline: 0;
 }
+.inside-list-background {
+    background: #368136;
+
+}
+.index-list {
+    margin-inline: 0;
+    padding-inline: 0;
+    list-style-type: none;
+    background: #f38e14;
+}
