@@ -1,33 +1,13 @@
 const listNameInput = document.getElementById("list_name");
 const createListButton = document.getElementById("create-list-button");
 const listsContainer = document.getElementById("lists");
-const main = document.querySelector("main");
 const storageKey = "lists";
-let listNumber = 0;
-
-function showListDetails(details) {
-  const allDetails = document.querySelectorAll(".list-details");
-  allDetails.forEach((section) => {
-    section.hidden = true;
-  });
-
-  details.hidden = false;
-  details.scrollIntoView({ behavior: "smooth", block: "start" });
-}
 
 function addList(listName) {
-  const listId = `list-${++listNumber}`;
   const listItem = document.createElement("li");
   const listLink = document.createElement("a");
   listLink.className = "list-card";
-  listLink.href = `#${listId}`;
-  listLink.addEventListener("click", (event) => {
-    event.preventDefault();
-    const details = document.getElementById(listId);
-    if (details) {
-      showListDetails(details);
-    }
-  });
+  listLink.href = `inside_list.html?list=${encodeURIComponent(listName)}`;
 
   const title = document.createElement("span");
   title.className = "list-card__title";
@@ -41,35 +21,6 @@ function addList(listName) {
   listLink.append(title, arrow);
   listItem.append(listLink);
   listsContainer.append(listItem);
-
-  const details = document.createElement("section");
-  details.className = "list-details";
-  details.id = listId;
-  details.hidden = true;
-
-  const backLink = document.createElement("a");
-  backLink.className = "back-link";
-  backLink.href = "#lists";
-  backLink.textContent = "← Назад к спискам";
-  backLink.addEventListener("click", (event) => {
-    event.preventDefault();
-    details.hidden = true;
-    listsContainer.hidden = false;
-    listsContainer.scrollIntoView({ behavior: "smooth", block: "start" });
-  });
-
-  const heading = document.createElement("a");
-  heading.className = "list-details__heading";
-  heading.href = `#${listId}`;
-  heading.textContent = listName;
-  heading.addEventListener("click", (event) => {
-    event.preventDefault();
-    showListDetails(details);
-  });
-
-  const listContent = document.createElement("ul");
-  details.append(backLink, heading, listContent);
-  main.append(details);
 }
 
 let savedLists = [];
@@ -82,21 +33,68 @@ try {
   savedLists = [];
 }
 
-savedLists.forEach(addList);
+function createItemElement(itemName) {
+  const itemElement = document.createElement("li");
+  itemElement.className = "item";
+  itemElement.textContent = itemName;
+  return itemElement;
+}
 
-createListButton.addEventListener("click", function () {
-  const listName = listNameInput.value.trim();
+if (listsContainer && createListButton && listNameInput) {
+  savedLists.forEach(addList);
 
-  if (!listName) {
+  createListButton.addEventListener("click", function () {
+    const listName = listNameInput.value.trim();
+
+    if (!listName) {
+      listNameInput.focus();
+      return;
+    }
+
+    addList(listName);
+    savedLists.push(listName);
+    localStorage.setItem(storageKey, JSON.stringify(savedLists));
+
+    listNameInput.value = "";
     listNameInput.focus();
-    return;
+  });
+}
+
+const itemInput = document.getElementById("item-input");
+const addItemButton = document.getElementById("add-item-button");
+const itemList = document.getElementById("item-list");
+const listTitle = document.getElementById("list-title");
+
+if (itemInput && addItemButton && itemList && listTitle) {
+  const listName = new URLSearchParams(window.location.search).get("list") || "Список";
+  const itemStorageKey = `items:${listName}`;
+  let savedItems = [];
+
+  listTitle.textContent = listName;
+  document.title = listName;
+
+  try {
+    const storedItems = JSON.parse(localStorage.getItem(itemStorageKey) || "[]");
+    if (Array.isArray(storedItems)) {
+      savedItems = storedItems.filter((item) => typeof item === "string");
+    }
+  } catch {
+    savedItems = [];
   }
 
-  addList(listName);
-  savedLists.push(listName);
-  localStorage.setItem(storageKey, JSON.stringify(savedLists));
+  savedItems.forEach((itemName) => itemList.append(createItemElement(itemName)));
 
-  listNameInput.value = "";
-  listNameInput.focus();
-});
+  addItemButton.addEventListener("click", function () {
+    const itemName = itemInput.value.trim();
+    if (!itemName) {
+      itemInput.focus();
+      return;
+    }
 
+    savedItems.push(itemName);
+    localStorage.setItem(itemStorageKey, JSON.stringify(savedItems));
+    itemList.append(createItemElement(itemName));
+    itemInput.value = "";
+    itemInput.focus();
+  });
+}

@@ -2,3 +2,7 @@ h1 {
     margin-inline: 40rem;
     font-family: "Bookman Old Style" , serif;
 }
+
+.inside-list-title {
+    margin-inline: 0;
+}
