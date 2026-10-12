@@ -132,7 +132,7 @@ addTopicButton.addEventListener("click", function () {
     return;
   }
 
-  const topicElement = document.createElement("h3"); //надо чтобы они были отдельными элементами, а не списком, так как это заголовки
+  const topicElement = document.createElement("h3"); //надо чтобы они были отдельными элементами, а не списком, так как это заголовки и чтобы оно сохранялось в localstorage, но пока что не сохраняется
   topicElement.className = "topic";
   topicElement.textContent = topicName;
   topicList.append(topicElement);
