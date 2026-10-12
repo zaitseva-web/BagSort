@@ -93,6 +93,7 @@ function createItemElement(itemName) {
   const itemElement = document.createElement("li");
   itemElement.className = "item";
   itemElement.textContent = itemName;
+  itemElement.classList.add("inside-list-item-border");
   attachDragHandlers(itemElement);
   return itemElement;
 }
