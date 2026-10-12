@@ -24,6 +24,10 @@ function addList(listName) {
 }
 
 let savedLists = [];
+let savedItems = [];
+let itemStorageKey = "";
+let draggedItem = null;
+
 try {
   const storedLists = JSON.parse(localStorage.getItem(storageKey) || "[]");
   if (Array.isArray(storedLists)) {
@@ -33,10 +37,63 @@ try {
   savedLists = [];
 }
 
+function syncItemsFromDom() {
+  if (!itemList || !itemStorageKey) return;
+
+  const orderedItems = Array.from(itemList.children).map((element) => element.textContent.trim());
+  const filteredItems = orderedItems.filter((name) => name);
+  savedItems = filteredItems;
+  localStorage.setItem(itemStorageKey, JSON.stringify(savedItems));
+}
+
+function attachDragHandlers(itemElement) {
+  itemElement.setAttribute("draggable", "true");
+
+  itemElement.addEventListener("dragstart", function (event) {
+    draggedItem = this;
+    this.classList.add("dragging");
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("text/plain", this.textContent);
+    }
+  });
+
+  itemElement.addEventListener("dragend", function () {
+    this.classList.remove("dragging");
+    draggedItem = null;
+  });
+
+  itemElement.addEventListener("dragover", function (event) {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = "move";
+    }
+  });
+
+  itemElement.addEventListener("drop", function (event) {
+    event.preventDefault();
+    if (!draggedItem || draggedItem === this || !itemList) {
+      return;
+    }
+
+    const draggedIndex = Array.from(itemList.children).indexOf(draggedItem);
+    const targetIndex = Array.from(itemList.children).indexOf(this);
+
+    if (draggedIndex < targetIndex) {
+      itemList.insertBefore(draggedItem, this.nextSibling);
+    } else {
+      itemList.insertBefore(draggedItem, this);
+    }
+
+    syncItemsFromDom();
+  });
+}
+
 function createItemElement(itemName) {
   const itemElement = document.createElement("li");
   itemElement.className = "item";
   itemElement.textContent = itemName;
+  attachDragHandlers(itemElement);
   return itemElement;
 }
 
@@ -67,8 +124,7 @@ const listTitle = document.getElementById("list-title");
 
 if (itemInput && addItemButton && itemList && listTitle) {
   const listName = new URLSearchParams(window.location.search).get("list") || "Список";
-  const itemStorageKey = `items:${listName}`;
-  let savedItems = [];
+  itemStorageKey = `items:${listName}`;
 
   listTitle.textContent = listName;
   document.title = listName;
