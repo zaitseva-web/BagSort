@@ -115,6 +115,31 @@ if (listsContainer && createListButton && listNameInput) {
     listNameInput.focus();
   });
 }
+const topicInput = document.getElementById("topic");
+const addTopicButton = document.getElementById("add-topic-button");
+const topicList = document.getElementById("topic-list");
+
+topicInput.addEventListener("keypress", function (event) {
+  if (event.key === "Enter") {
+    addTopicButton.click();
+  }
+});
+
+addTopicButton.addEventListener("click", function () {
+  const topicName = topicInput.value.trim();
+  if (!topicName) {
+    topicInput.focus();
+    return;
+  }
+
+  const topicElement = document.createElement("h3"); //надо чтобы они были отдельными элементами, а не списком, так как это заголовки
+  topicElement.className = "topic";
+  topicElement.textContent = topicName;
+  topicList.append(topicElement);
+
+  topicInput.value = "";
+  topicInput.focus();
+});
 
 const itemInput = document.getElementById("item-input");
 const addItemButton = document.getElementById("add-item-button");
