@@ -22,4 +22,44 @@ h1 {
     padding: 1rem;
     margin: 1rem;
     width: 35%;
+    box-sizing: border-box;
+}
+
+.item-list {
+    list-style: none;
+    padding: 0;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1rem;
+    transition: opacity 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.item.dragging {
+    opacity: 0.5;
+    background-color: #e0f7fa;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    transform: scale(1.02);
+}
+
+.item__name {
+    overflow-wrap: anywhere;
+}
+
+.drag-handle {
+    flex: 0 0 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #777;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
 }

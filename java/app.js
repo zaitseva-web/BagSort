@@ -27,6 +27,8 @@ let savedLists = [];
 let savedItems = [];
 let itemStorageKey = "";
 let draggedItem = null;
+let dragHandle = null;
+let activePointerId = null;
 
 try {
   const storedLists = JSON.parse(localStorage.getItem(storageKey) || "[]");
@@ -40,61 +42,57 @@ try {
 function syncItemsFromDom() {
   if (!itemList || !itemStorageKey) return;
 
-  const orderedItems = Array.from(itemList.children).map((element) => element.textContent.trim());
-  const filteredItems = orderedItems.filter((name) => name);
-  savedItems = filteredItems;
+  savedItems = Array.from(itemList.querySelectorAll(".item__name"))
+    .map((element) => element.textContent.trim())
+    .filter(Boolean);
   localStorage.setItem(itemStorageKey, JSON.stringify(savedItems));
 }
 
-function attachDragHandlers(itemElement) {
-  itemElement.setAttribute("draggable", "true");
+function getDragAfterElement(container, pointerY) {
+  const items = Array.from(container.querySelectorAll(".item:not(.dragging)"));
 
-  itemElement.addEventListener("dragstart", function (event) {
-    draggedItem = this;
-    this.classList.add("dragging");
-    if (event.dataTransfer) {
-      event.dataTransfer.effectAllowed = "move";
-      event.dataTransfer.setData("text/plain", this.textContent);
-    }
-  });
+  return items.reduce((closest, item) => {
+    const bounds = item.getBoundingClientRect();
+    const offset = pointerY - bounds.top - bounds.height / 2;
 
-  itemElement.addEventListener("dragend", function () {
-    this.classList.remove("dragging");
-    draggedItem = null;
-  });
-
-  itemElement.addEventListener("dragover", function (event) {
-    event.preventDefault();
-    if (event.dataTransfer) {
-      event.dataTransfer.dropEffect = "move";
-    }
-  });
-
-  itemElement.addEventListener("drop", function (event) {
-    event.preventDefault();
-    if (!draggedItem || draggedItem === this || !itemList) {
-      return;
+    if (offset < 0 && offset > closest.offset) {
+      return { offset, element: item };
     }
 
-    const draggedIndex = Array.from(itemList.children).indexOf(draggedItem);
-    const targetIndex = Array.from(itemList.children).indexOf(this);
+    return closest;
+  }, { offset: Number.NEGATIVE_INFINITY, element: null }).element;
+}
 
-    if (draggedIndex < targetIndex) {
-      itemList.insertBefore(draggedItem, this.nextSibling);
-    } else {
-      itemList.insertBefore(draggedItem, this);
-    }
+function finishItemDrag(event) {
+  if (!draggedItem || event.pointerId !== activePointerId) return;
 
-    syncItemsFromDom();
-  });
+  draggedItem.classList.remove("dragging");
+  syncItemsFromDom();
+
+  const pointerId = activePointerId;
+  draggedItem = null;
+  dragHandle = null;
+  activePointerId = null;
+
+  if (itemList.hasPointerCapture(pointerId)) {
+    itemList.releasePointerCapture(pointerId);
+  }
 }
 
 function createItemElement(itemName) {
   const itemElement = document.createElement("li");
-  itemElement.className = "item";
-  itemElement.textContent = itemName;
-  itemElement.classList.add("inside-list-item-border");
-  attachDragHandlers(itemElement);
+  itemElement.className = "item inside-list-item-border";
+
+  const name = document.createElement("span");
+  name.className = "item__name";
+  name.textContent = itemName;
+
+  const handle = document.createElement("span");
+  handle.className = "drag-handle";
+  handle.setAttribute("aria-hidden", "true");
+  handle.textContent = "☰";
+
+  itemElement.append(name, handle);
   return itemElement;
 }
 
@@ -141,6 +139,38 @@ if (itemInput && addItemButton && itemList && listTitle) {
 
   savedItems.forEach((itemName) => itemList.append(createItemElement(itemName)));
 
+  itemList.addEventListener("pointerdown", (event) => {
+    const handle = event.target.closest(".drag-handle");
+    if (!handle || !itemList.contains(handle) || !event.isPrimary || (event.pointerType === "mouse" && event.button !== 0)) {
+      return;
+    }
+
+    draggedItem = handle.closest(".item");
+    if (!draggedItem) return;
+
+    dragHandle = handle;
+    activePointerId = event.pointerId;
+    itemList.setPointerCapture(event.pointerId);
+    draggedItem.classList.add("dragging");
+    event.preventDefault();
+  });
+
+  itemList.addEventListener("pointermove", (event) => {
+    if (!draggedItem || event.pointerId !== activePointerId) return;
+
+    event.preventDefault();
+    const afterElement = getDragAfterElement(itemList, event.clientY);
+    if (afterElement) {
+      itemList.insertBefore(draggedItem, afterElement);
+    } else {
+      itemList.append(draggedItem);
+    }
+  });
+
+  itemList.addEventListener("pointerup", finishItemDrag);
+  itemList.addEventListener("pointercancel", finishItemDrag);
+  itemList.addEventListener("lostpointercapture", finishItemDrag);
+
   addItemButton.addEventListener("click", function () {
     const itemName = itemInput.value.trim();
     if (!itemName) {
@@ -154,4 +184,82 @@ if (itemInput && addItemButton && itemList && listTitle) {
     itemInput.value = "";
     itemInput.focus();
   });
+}
+const list = document.getElementById('sortable-list');
+if (list) {
+let draggingItem = null;
+let nextItem = null;
+
+// Функція, яка визначає, над яким елементом зараз знаходиться палець/мишка
+function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.list-item:not(.dragging)')];
+
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+// 1. Коли ми натиснули (або затиснули пальцем)
+list.addEventListener('pointerdown', (e) => {
+    // Шукаємо, чи натиснули ми саме на ручку (drag-handle)
+    const handle = e.target.closest('.drag-handle');
+    if (!handle) return; // Якщо ні, ігноруємо
+
+    // Знаходимо батьківський елемент списку
+    draggingItem = handle.closest('.list-item');
+    if (!draggingItem) return;
+
+    // Захоплюємо pointer, щоб події pointermove спрацьовували, навіть якщо палець вийде за межі елемента
+    e.target.setPointerCapture(e.pointerId);
+    
+    // Додаємо клас для візуального ефекту (стає напівпрозорим)
+    // setTimeout потрібен, щоб браузер встиг відрендерити стан ДО початку руху
+    setTimeout(() => {
+        draggingItem.classList.add('dragging');
+    }, 0);
+});
+
+// 2. Коли ми рухаємо пальцем/мишкою
+list.addEventListener('pointermove', (e) => {
+    if (!draggingItem) return; // Якщо нічого не тагнемо, виходимо
+    
+    e.preventDefault(); // Запобігаємо скролу сторінки на телефоні!
+
+    // Знаходимо елемент, після якого треба вставити той, що тагнемо
+    const afterElement = getDragAfterElement(list, e.clientY);
+    
+    if (afterElement == null) {
+        // Якщо ми в самому низу списку
+        list.appendChild(draggingItem);
+    } else {
+        // Вставляємо перед знайденим елементом
+        list.insertBefore(draggingItem, afterElement);
+    }
+});
+
+// 3. Коли ми відпустили палець/мишку
+list.addEventListener('pointerup', (e) => {
+    if (!draggingItem) return;
+    
+    // Відпускаємо pointer
+    e.target.releasePointerCapture(e.pointerId);
+    
+    // Прибираємо клас для візуального ефекту
+    draggingItem.classList.remove('dragging');
+    draggingItem = null;
+});
+
+// Також обробляємо відміну pointer (наприклад, якщо тач перервався дзвінком)
+list.addEventListener('pointercancel', (e) => {
+    if (!draggingItem) return;
+    e.target.releasePointerCapture(e.pointerId);
+    draggingItem.classList.remove('dragging');
+    draggingItem = null;
+});
 }
