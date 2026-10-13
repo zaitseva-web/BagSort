@@ -86,111 +86,11 @@ if (listsContainer && createListButton && listNameInput) {
   });
 }
 
-if (topicInput && addTopicButton && topicList) {
-  const topicStorageKey = `topics:${getCurrentListName()}`;
-  let draggedTopic = null;
-  let topicPointerId = null;
-
-  function saveTopics() {
-    const topics = Array.from(topicList.querySelectorAll(".topic"))
-      .map((element) => element.textContent.trim())
-      .filter(Boolean);
-    saveArray(topicStorageKey, topics);
-  }
-
-  function createTopic(name) {
-    const topic = document.createElement("h3");
-    topic.className = "topic";
-    topic.textContent = name;
-    return topic;
-  }
-
-  function getTopicAfter(pointerY) {
-    return Array.from(topicList.querySelectorAll(".topic:not(.dragging)"))
-      .reduce(
-        (closest, topic) => {
-          const bounds = topic.getBoundingClientRect();
-          const offset = pointerY - bounds.top - bounds.height / 2;
-
-          return offset < 0 && offset > closest.offset
-            ? { offset, element: topic }
-            : closest;
-        },
-        { offset: Number.NEGATIVE_INFINITY, element: null }
-      ).element;
-  }
-
-  function finishTopicDrag(event) {
-    if (!draggedTopic || event.pointerId !== topicPointerId) return;
-
-    draggedTopic.classList.remove("dragging");
-    saveTopics();
-
-    const pointerId = topicPointerId;
-    draggedTopic = null;
-    topicPointerId = null;
-
-    if (topicList.hasPointerCapture(pointerId)) {
-      topicList.releasePointerCapture(pointerId);
-    }
-  }
-
-  readArray(topicStorageKey)
-    .filter((name) => typeof name === "string")
-    .forEach((name) => topicList.append(createTopic(name)));
-
-  addTopicButton.addEventListener("click", (event) => {
-    event.preventDefault();
-
-    const name = topicInput.value.trim();
-    if (!name) {
-      topicInput.focus();
-      return;
-    }
-
-    topicList.append(createTopic(name));
-    saveTopics();
-    topicInput.value = "";
-    topicInput.focus();
-  });
-
-  topicList.addEventListener("pointerdown", (event) => {
-    const topic = event.target instanceof Element
-      ? event.target.closest(".topic")
-      : null;
-
-    if (
-      !topic ||
-      !topicList.contains(topic) ||
-      !event.isPrimary ||
-      (event.pointerType === "mouse" && event.button !== 0)
-    ) {
-      return;
-    }
-
-    draggedTopic = topic;
-    topicPointerId = event.pointerId;
-    topicList.setPointerCapture(event.pointerId);
-    draggedTopic.classList.add("dragging");
-    event.preventDefault();
-  });
-
-  topicList.addEventListener("pointermove", (event) => {
-    if (!draggedTopic || event.pointerId !== topicPointerId) return;
-
-    event.preventDefault();
-    const afterTopic = getTopicAfter(event.clientY);
-
-    if (afterTopic) {
-      topicList.insertBefore(draggedTopic, afterTopic);
-    } else {
-      topicList.append(draggedTopic);
-    }
-  });
-
-  topicList.addEventListener("pointerup", finishTopicDrag);
-  topicList.addEventListener("pointercancel", finishTopicDrag);
-  topicList.addEventListener("lostpointercapture", finishTopicDrag);
+function createTopic(name) {
+  const topic = document.createElement("h3");
+  topic.className = "topic";
+  topic.textContent = name;
+  return topic;
 }
 
 function createItem(name) {
@@ -210,109 +110,155 @@ function createItem(name) {
   return item;
 }
 
-function saveItemsFromDom() {
-  if (!itemList || !itemStorageKey) return;
+const contentContainer = topicList || document.getElementById("item-list");
 
-  savedItems = Array.from(itemList.querySelectorAll(".item__name"))
-    .map((element) => element.textContent.trim())
-    .filter(Boolean);
+if (contentContainer) {
+  const listName = getCurrentListName();
+  const contentStorageKey = `content:${listName}`;
+  let draggedElement = null;
+  let activeContentPointerId = null;
 
-  saveArray(itemStorageKey, savedItems);
-}
+  function getContent() {
+    return Array.from(contentContainer.children)
+      .filter((element) =>
+        element.classList.contains("topic") ||
+        element.classList.contains("item")
+      )
+      .map((element) => ({
+        type: element.classList.contains("topic") ? "topic" : "item",
+        name: element.classList.contains("topic")
+          ? element.textContent.trim()
+          : element.querySelector(".item__name")?.textContent.trim() || ""
+      }))
+      .filter((entry) => entry.name);
+  }
 
-function getItemAfterElement(container, pointerY) {
-  const elements = Array.from(
-    container.querySelectorAll(".topic, .item:not(.dragging)")
+  function saveContent() {
+    saveArray(contentStorageKey, getContent());
+  }
+
+  function addContent(entry) {
+    if (!entry || typeof entry.name !== "string" || !entry.name.trim()) return;
+
+    if (entry.type === "topic" && topicList) {
+      contentContainer.append(createTopic(entry.name.trim()));
+    } else if (entry.type === "item") {
+      contentContainer.append(createItem(entry.name.trim()));
+    }
+  }
+
+  let savedContent = readArray(contentStorageKey).filter(
+    (entry) =>
+      entry &&
+      (entry.type === "topic" || entry.type === "item") &&
+      typeof entry.name === "string"
   );
 
-  return elements.reduce(
-    (closest, element) => {
-      const bounds = element.getBoundingClientRect();
-      const offset = pointerY - bounds.top - bounds.height / 2;
+  // Перенос данных из старых хранилищ при первом запуске этой версии.
+  if (savedContent.length === 0) {
+    const oldTopics = topicList
+      ? readArray(`topics:${listName}`)
+          .filter((name) => typeof name === "string")
+          .map((name) => ({ type: "topic", name }))
+      : [];
 
-      return offset < 0 && offset > closest.offset
-        ? { offset, element }
-        : closest;
-    },
-    { offset: Number.NEGATIVE_INFINITY, element: null }
-  ).element;
-}
+    const oldItems = readArray(`items:${listName}`)
+      .filter((name) => typeof name === "string")
+      .map((name) => ({ type: "item", name }));
 
-function finishItemDrag(event) {
-  if (!draggedItem || event.pointerId !== activePointerId) return;
-
-  draggedItem.classList.remove("dragging");
-  saveItemsFromDom();
-
-  const pointerId = activePointerId;
-  draggedItem = null;
-  activePointerId = null;
-
-  if (itemList.hasPointerCapture(pointerId)) {
-    itemList.releasePointerCapture(pointerId);
+    savedContent = [...oldTopics, ...oldItems];
   }
-}
 
-if (itemInput && addItemButton && itemList && listTitle) {
-  const listName = getCurrentListName();
-  itemStorageKey = `items:${listName}`;
+  savedContent.forEach(addContent);
+  saveContent();
 
-  listTitle.textContent = listName;
-  document.title = listName;
+  if (listTitle) {
+    listTitle.textContent = listName;
+    document.title = listName;
+  }
 
-  savedItems = readArray(itemStorageKey)
-    .filter((name) => typeof name === "string");
-  savedItems.forEach((name) => itemList.append(createItem(name)));
+  if (topicInput && addTopicButton && topicList) {
+    addTopicButton.addEventListener("click", (event) => {
+      event.preventDefault();
 
-  itemList.addEventListener("pointerdown", (event) => {
-    const handle = event.target.closest(".drag-handle");
-    if (
-      !handle ||
-      !itemList.contains(handle) ||
-      !event.isPrimary ||
-      (event.pointerType === "mouse" && event.button !== 0)
-    ) {
+      const name = topicInput.value.trim();
+      if (!name) {
+        topicInput.focus();
+        return;
+      }
+
+      contentContainer.append(createTopic(name));
+      saveContent();
+      topicInput.value = "";
+      topicInput.focus();
+    });
+  }
+
+  if (itemInput && addItemButton) {
+    addItemButton.addEventListener("click", (event) => {
+      event.preventDefault();
+
+      const name = itemInput.value.trim();
+      if (!name) {
+        itemInput.focus();
+        return;
+      }
+
+      contentContainer.append(createItem(name));
+      saveContent();
+      itemInput.value = "";
+      itemInput.focus();
+    });
+  }
+
+  contentContainer.addEventListener("pointerdown", (event) => {
+    if (!event.isPrimary || (event.pointerType === "mouse" && event.button !== 0)) {
       return;
     }
 
-    draggedItem = handle.closest(".item");
-    if (!draggedItem) return;
+    const target = event.target instanceof Element ? event.target : null;
+    const element = target?.closest(".topic, .item");
 
-    activePointerId = event.pointerId;
-    itemList.setPointerCapture(event.pointerId);
-    draggedItem.classList.add("dragging");
+    if (!element || !contentContainer.contains(element)) return;
+
+    draggedElement = element;
+    activeContentPointerId = event.pointerId;
+    contentContainer.setPointerCapture(event.pointerId);
+    element.classList.add("dragging");
     event.preventDefault();
   });
 
-  itemList.addEventListener("pointermove", (event) => {
-    if (!draggedItem || event.pointerId !== activePointerId) return;
+  contentContainer.addEventListener("pointermove", (event) => {
+    if (!draggedElement || event.pointerId !== activeContentPointerId) return;
 
-    event.preventDefault();
-    const afterElement = getItemAfterElement(itemList, event.clientY);
+    const others = Array.from(
+      contentContainer.querySelectorAll(".topic, .item")
+    ).filter((element) => element !== draggedElement);
+
+    const afterElement = others.find((element) => {
+      const bounds = element.getBoundingClientRect();
+      return event.clientY < bounds.top + bounds.height / 2;
+    });
 
     if (afterElement) {
-      itemList.insertBefore(draggedItem, afterElement);
+      contentContainer.insertBefore(draggedElement, afterElement);
     } else {
-      itemList.append(draggedItem);
+      contentContainer.append(draggedElement);
     }
-  });
 
-  itemList.addEventListener("pointerup", finishItemDrag);
-  itemList.addEventListener("pointercancel", finishItemDrag);
-  itemList.addEventListener("lostpointercapture", finishItemDrag);
-
-  addItemButton.addEventListener("click", (event) => {
     event.preventDefault();
-
-    const name = itemInput.value.trim();
-    if (!name) {
-      itemInput.focus();
-      return;
-    }
-
-    itemList.append(createItem(name));
-    saveItemsFromDom();
-    itemInput.value = "";
-    itemInput.focus();
   });
+
+  function finishDrag(event) {
+    if (!draggedElement || event.pointerId !== activeContentPointerId) return;
+
+    draggedElement.classList.remove("dragging");
+    draggedElement = null;
+    activeContentPointerId = null;
+    saveContent();
+  }
+
+  contentContainer.addEventListener("pointerup", finishDrag);
+  contentContainer.addEventListener("pointercancel", finishDrag);
+  contentContainer.addEventListener("lostpointercapture", finishDrag);
 }
