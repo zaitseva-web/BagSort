@@ -35,17 +35,21 @@ try {
   if (Array.isArray(storedLists)) {
     savedLists = storedLists.filter((name) => typeof name === "string");
   }
-} catch {
+} catch(error) {
   savedLists = [];
 }
 
 function syncItemsFromDom() {
   if (!itemList || !itemStorageKey) return;
 
-  savedItems = Array.from(itemList.querySelectorAll(".item__name"))
-    .map((element) => element.textContent.trim())
-    .filter(Boolean);
-  localStorage.setItem(itemStorageKey, JSON.stringify(savedItems));
+  try {
+    savedItems = Array.from(itemList.querySelectorAll(".item__name"))
+      .map((element) => element.textContent.trim())
+      .filter(Boolean);
+    localStorage.setItem(itemStorageKey, JSON.stringify(savedItems));
+  } catch(error) {
+    /* Ignore unavailable storage */
+  }
 }
 
 function getDragAfterElement(container, pointerY) {
@@ -119,27 +123,54 @@ const topicInput = document.getElementById("topic");
 const addTopicButton = document.getElementById("add-topic-button");
 const topicList = document.getElementById("topic-list");
 
-topicInput.addEventListener("keypress", function (event) {
-  if (event.key === "Enter") {
-    addTopicButton.click();
-  }
-});
+if (topicInput && addTopicButton && topicList) {
+  const listName = new URLSearchParams(window.location.search).get("list") || "Список";
+  const topicStorageKey = `topics:${listName}`;
 
-addTopicButton.addEventListener("click", function () {
-  const topicName = topicInput.value.trim();
-  if (!topicName) {
+  function createTopicElement(topicName) {
+    const topicElement = document.createElement("h3");
+    topicElement.className = "topic";
+    topicElement.textContent = topicName;
+    return topicElement;
+  }
+
+  function syncTopicsFromDom() {
+    const topics = Array.from(topicList.querySelectorAll(".topic"))
+      .map((topicElement) => topicElement.textContent.trim())
+      .filter(Boolean);
+    localStorage.setItem(topicStorageKey, JSON.stringify(topics));
+  }
+
+  try {
+    const savedTopics = JSON.parse(localStorage.getItem(topicStorageKey) || "[]");
+    if (Array.isArray(savedTopics)) {
+      savedTopics
+        .filter((topicName) => typeof topicName === "string")
+        .forEach((topicName) => topicList.append(createTopicElement(topicName)));
+    }
+  } catch(error) {
+    /* Ignore invalid stored topics */
+  }
+
+  addTopicButton.addEventListener("click", (event) => {
+    event.preventDefault();
+
+    const topicName = topicInput.value.trim();
+    if (!topicName) {
+      topicInput.focus();
+      return;
+    }
+
+    topicList.append(createTopicElement(topicName));
+    syncTopicsFromDom();
+    topicInput.value = "";
     topicInput.focus();
-    return;
-  }
+  });
 
-  const topicElement = document.createElement("h3"); //надо чтобы они были отдельными элементами, а не списком, так как это заголовки и чтобы оно сохранялось в localstorage, но пока что не сохраняется
-  topicElement.className = "topic";
-  topicElement.textContent = topicName;
-  topicList.append(topicElement);
-
-  topicInput.value = "";
-  topicInput.focus();
-});
+  const topicElements = topicList.querySelectorAll(".topic");
+  const topics = Array.from(topicElements).map((topicElement) => topicElement.textContent.trim()).filter(Boolean);
+  localStorage.setItem(topicStorageKey, JSON.stringify(topics));
+}
 
 const itemInput = document.getElementById("item-input");
 const addItemButton = document.getElementById("add-item-button");
@@ -158,7 +189,7 @@ if (itemInput && addItemButton && itemList && listTitle) {
     if (Array.isArray(storedItems)) {
       savedItems = storedItems.filter((item) => typeof item === "string");
     }
-  } catch {
+  } catch(error) {
     savedItems = [];
   }
 
@@ -196,8 +227,9 @@ if (itemInput && addItemButton && itemList && listTitle) {
   itemList.addEventListener("pointercancel", finishItemDrag);
   itemList.addEventListener("lostpointercapture", finishItemDrag);
 
-  addItemButton.addEventListener("click", function () {
+  addItemButton.addEventListener("click", () => {
     const itemName = itemInput.value.trim();
+
     if (!itemName) {
       itemInput.focus();
       return;
