@@ -1,81 +1,251 @@
 const listNameInput = document.getElementById("list_name");
 const createListButton = document.getElementById("create-list-button");
 const listsContainer = document.getElementById("lists");
-const storageKey = "lists";
 
-function addList(listName) {
+const topicInput = document.getElementById("topic");
+const addTopicButton = document.getElementById("add-topic-button");
+const topicList = document.getElementById("topic-list");
+const itemList = topicList || document.getElementById("item-list");
+
+const itemInput = document.getElementById("item-input");
+const addItemButton = document.getElementById("add-item-button");
+const listTitle = document.getElementById("list-title");
+
+const listStorageKey = "lists";
+let savedItems = [];
+let itemStorageKey = "";
+let draggedItem = null;
+let activePointerId = null;
+
+function readArray(key) {
+  try {
+    const value = JSON.parse(localStorage.getItem(key) || "[]");
+    return Array.isArray(value) ? value : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveArray(key, values) {
+  try {
+    localStorage.setItem(key, JSON.stringify(values));
+  } catch {
+    // Хранилище может быть недоступно.
+  }
+}
+
+function getCurrentListName() {
+  return new URLSearchParams(window.location.search).get("list") || "Список";
+}
+
+function createListCard(name) {
   const listItem = document.createElement("li");
-  const listLink = document.createElement("a");
-  listLink.className = "list-card";
-  listLink.href = `inside_list.html?list=${encodeURIComponent(listName)}`;
+  const link = document.createElement("a");
+  link.className = "list-card";
+  link.href = `inside_list.html?list=${encodeURIComponent(name)}`;
 
   const title = document.createElement("span");
   title.className = "list-card__title";
-  title.textContent = listName;
+  title.textContent = name;
 
   const arrow = document.createElement("span");
   arrow.className = "list-card__arrow";
   arrow.setAttribute("aria-hidden", "true");
   arrow.textContent = "→";
 
-  listLink.append(title, arrow);
-  listItem.append(listLink);
-  listsContainer.append(listItem);
+  link.append(title, arrow);
+  listItem.append(link);
+  return listItem;
 }
 
-let savedLists = [];
-let savedItems = [];
-let itemStorageKey = "";
-let draggedItem = null;
-let dragHandle = null;
-let activePointerId = null;
-
-try {
-  const storedLists = JSON.parse(localStorage.getItem(storageKey) || "[]");
-  if (Array.isArray(storedLists)) {
-    savedLists = storedLists.filter((name) => typeof name === "string");
-  }
-} catch(error) {
-  savedLists = [];
+if (listsContainer) {
+  readArray(listStorageKey)
+    .filter((name) => typeof name === "string")
+    .forEach((name) => listsContainer.append(createListCard(name)));
 }
 
-function syncItemsFromDom() {
-  if (!itemList || !itemStorageKey) return;
+if (listsContainer && createListButton && listNameInput) {
+  createListButton.addEventListener("click", (event) => {
+    event.preventDefault();
 
-  try {
-    savedItems = Array.from(itemList.querySelectorAll(".item__name"))
-      .map((element) => element.textContent.trim())
-      .filter(Boolean);
-    localStorage.setItem(itemStorageKey, JSON.stringify(savedItems));
-  } catch(error) {
-    /* Ignore unavailable storage */
-  }
-}
-
-function getDragAfterElement(container, pointerY) {
-  const items = Array.from(container.querySelectorAll(".item:not(.dragging)"));
-
-  return items.reduce((closest, item) => {
-    const bounds = item.getBoundingClientRect();
-    const offset = pointerY - bounds.top - bounds.height / 2;
-
-    if (offset < 0 && offset > closest.offset) {
-      return { offset, element: item };
+    const name = listNameInput.value.trim();
+    if (!name) {
+      listNameInput.focus();
+      return;
     }
 
-    return closest;
-  }, { offset: Number.NEGATIVE_INFINITY, element: null }).element;
+    listsContainer.append(createListCard(name));
+
+    const lists = readArray(listStorageKey)
+      .filter((savedName) => typeof savedName === "string");
+    lists.push(name);
+    saveArray(listStorageKey, lists);
+
+    listNameInput.value = "";
+    listNameInput.focus();
+  });
+}
+
+if (topicInput && addTopicButton && topicList) {
+  const topicStorageKey = `topics:${getCurrentListName()}`;
+  let draggedTopic = null;
+  let topicPointerId = null;
+
+  function saveTopics() {
+    const topics = Array.from(topicList.querySelectorAll(".topic"))
+      .map((element) => element.textContent.trim())
+      .filter(Boolean);
+    saveArray(topicStorageKey, topics);
+  }
+
+  function createTopic(name) {
+    const topic = document.createElement("h3");
+    topic.className = "topic";
+    topic.textContent = name;
+    return topic;
+  }
+
+  function getTopicAfter(pointerY) {
+    return Array.from(topicList.querySelectorAll(".topic:not(.dragging)"))
+      .reduce(
+        (closest, topic) => {
+          const bounds = topic.getBoundingClientRect();
+          const offset = pointerY - bounds.top - bounds.height / 2;
+
+          return offset < 0 && offset > closest.offset
+            ? { offset, element: topic }
+            : closest;
+        },
+        { offset: Number.NEGATIVE_INFINITY, element: null }
+      ).element;
+  }
+
+  function finishTopicDrag(event) {
+    if (!draggedTopic || event.pointerId !== topicPointerId) return;
+
+    draggedTopic.classList.remove("dragging");
+    saveTopics();
+
+    const pointerId = topicPointerId;
+    draggedTopic = null;
+    topicPointerId = null;
+
+    if (topicList.hasPointerCapture(pointerId)) {
+      topicList.releasePointerCapture(pointerId);
+    }
+  }
+
+  readArray(topicStorageKey)
+    .filter((name) => typeof name === "string")
+    .forEach((name) => topicList.append(createTopic(name)));
+
+  addTopicButton.addEventListener("click", (event) => {
+    event.preventDefault();
+
+    const name = topicInput.value.trim();
+    if (!name) {
+      topicInput.focus();
+      return;
+    }
+
+    topicList.append(createTopic(name));
+    saveTopics();
+    topicInput.value = "";
+    topicInput.focus();
+  });
+
+  topicList.addEventListener("pointerdown", (event) => {
+    const topic = event.target instanceof Element
+      ? event.target.closest(".topic")
+      : null;
+
+    if (
+      !topic ||
+      !topicList.contains(topic) ||
+      !event.isPrimary ||
+      (event.pointerType === "mouse" && event.button !== 0)
+    ) {
+      return;
+    }
+
+    draggedTopic = topic;
+    topicPointerId = event.pointerId;
+    topicList.setPointerCapture(event.pointerId);
+    draggedTopic.classList.add("dragging");
+    event.preventDefault();
+  });
+
+  topicList.addEventListener("pointermove", (event) => {
+    if (!draggedTopic || event.pointerId !== topicPointerId) return;
+
+    event.preventDefault();
+    const afterTopic = getTopicAfter(event.clientY);
+
+    if (afterTopic) {
+      topicList.insertBefore(draggedTopic, afterTopic);
+    } else {
+      topicList.append(draggedTopic);
+    }
+  });
+
+  topicList.addEventListener("pointerup", finishTopicDrag);
+  topicList.addEventListener("pointercancel", finishTopicDrag);
+  topicList.addEventListener("lostpointercapture", finishTopicDrag);
+}
+
+function createItem(name) {
+  const item = document.createElement("div");
+  item.className = "item inside-list-item-border";
+
+  const itemName = document.createElement("span");
+  itemName.className = "item__name";
+  itemName.textContent = name;
+
+  const handle = document.createElement("span");
+  handle.className = "drag-handle";
+  handle.setAttribute("aria-hidden", "true");
+  handle.textContent = "☰";
+
+  item.append(itemName, handle);
+  return item;
+}
+
+function saveItemsFromDom() {
+  if (!itemList || !itemStorageKey) return;
+
+  savedItems = Array.from(itemList.querySelectorAll(".item__name"))
+    .map((element) => element.textContent.trim())
+    .filter(Boolean);
+
+  saveArray(itemStorageKey, savedItems);
+}
+
+function getItemAfterElement(container, pointerY) {
+  const elements = Array.from(
+    container.querySelectorAll(".topic, .item:not(.dragging)")
+  );
+
+  return elements.reduce(
+    (closest, element) => {
+      const bounds = element.getBoundingClientRect();
+      const offset = pointerY - bounds.top - bounds.height / 2;
+
+      return offset < 0 && offset > closest.offset
+        ? { offset, element }
+        : closest;
+    },
+    { offset: Number.NEGATIVE_INFINITY, element: null }
+  ).element;
 }
 
 function finishItemDrag(event) {
   if (!draggedItem || event.pointerId !== activePointerId) return;
 
   draggedItem.classList.remove("dragging");
-  syncItemsFromDom();
+  saveItemsFromDom();
 
   const pointerId = activePointerId;
   draggedItem = null;
-  dragHandle = null;
   activePointerId = null;
 
   if (itemList.hasPointerCapture(pointerId)) {
@@ -83,128 +253,31 @@ function finishItemDrag(event) {
   }
 }
 
-function createItemElement(itemName) {
-  const itemElement = document.createElement("li");
-  itemElement.className = "item inside-list-item-border";
-
-  const name = document.createElement("span");
-  name.className = "item__name";
-  name.textContent = itemName;
-
-  const handle = document.createElement("span");
-  handle.className = "drag-handle";
-  handle.setAttribute("aria-hidden", "true");
-  handle.textContent = "☰";
-
-  itemElement.append(name, handle);
-  return itemElement;
-}
-
-if (listsContainer && createListButton && listNameInput) {
-  savedLists.forEach(addList);
-
-  createListButton.addEventListener("click", function () {
-    const listName = listNameInput.value.trim();
-
-    if (!listName) {
-      listNameInput.focus();
-      return;
-    }
-
-    addList(listName);
-    savedLists.push(listName);
-    localStorage.setItem(storageKey, JSON.stringify(savedLists));
-
-    listNameInput.value = "";
-    listNameInput.focus();
-  });
-}
-const topicInput = document.getElementById("topic");
-const addTopicButton = document.getElementById("add-topic-button");
-const topicList = document.getElementById("topic-list");
-
-if (topicInput && addTopicButton && topicList) {
-  const listName = new URLSearchParams(window.location.search).get("list") || "Список";
-  const topicStorageKey = `topics:${listName}`;
-
-  function createTopicElement(topicName) {
-    const topicElement = document.createElement("h3");
-    topicElement.className = "topic";
-    topicElement.textContent = topicName;
-    return topicElement;
-  }
-
-  function syncTopicsFromDom() {
-    const topics = Array.from(topicList.querySelectorAll(".topic"))
-      .map((topicElement) => topicElement.textContent.trim())
-      .filter(Boolean);
-    localStorage.setItem(topicStorageKey, JSON.stringify(topics));
-  }
-
-  try {
-    const savedTopics = JSON.parse(localStorage.getItem(topicStorageKey) || "[]");
-    if (Array.isArray(savedTopics)) {
-      savedTopics
-        .filter((topicName) => typeof topicName === "string")
-        .forEach((topicName) => topicList.append(createTopicElement(topicName)));
-    }
-  } catch(error) {
-    /* Ignore invalid stored topics */
-  }
-
-  addTopicButton.addEventListener("click", (event) => {
-    event.preventDefault();
-
-    const topicName = topicInput.value.trim();
-    if (!topicName) {
-      topicInput.focus();
-      return;
-    }
-
-    topicList.append(createTopicElement(topicName));
-    syncTopicsFromDom();
-    topicInput.value = "";
-    topicInput.focus();
-  });
-
-  const topicElements = topicList.querySelectorAll(".topic");
-  const topics = Array.from(topicElements).map((topicElement) => topicElement.textContent.trim()).filter(Boolean);
-  localStorage.setItem(topicStorageKey, JSON.stringify(topics));
-}
-
-const itemInput = document.getElementById("item-input");
-const addItemButton = document.getElementById("add-item-button");
-const itemList = document.getElementById("item-list");
-const listTitle = document.getElementById("list-title");
-
 if (itemInput && addItemButton && itemList && listTitle) {
-  const listName = new URLSearchParams(window.location.search).get("list") || "Список";
+  const listName = getCurrentListName();
   itemStorageKey = `items:${listName}`;
 
   listTitle.textContent = listName;
   document.title = listName;
 
-  try {
-    const storedItems = JSON.parse(localStorage.getItem(itemStorageKey) || "[]");
-    if (Array.isArray(storedItems)) {
-      savedItems = storedItems.filter((item) => typeof item === "string");
-    }
-  } catch(error) {
-    savedItems = [];
-  }
-
-  savedItems.forEach((itemName) => itemList.append(createItemElement(itemName)));
+  savedItems = readArray(itemStorageKey)
+    .filter((name) => typeof name === "string");
+  savedItems.forEach((name) => itemList.append(createItem(name)));
 
   itemList.addEventListener("pointerdown", (event) => {
     const handle = event.target.closest(".drag-handle");
-    if (!handle || !itemList.contains(handle) || !event.isPrimary || (event.pointerType === "mouse" && event.button !== 0)) {
+    if (
+      !handle ||
+      !itemList.contains(handle) ||
+      !event.isPrimary ||
+      (event.pointerType === "mouse" && event.button !== 0)
+    ) {
       return;
     }
 
     draggedItem = handle.closest(".item");
     if (!draggedItem) return;
 
-    dragHandle = handle;
     activePointerId = event.pointerId;
     itemList.setPointerCapture(event.pointerId);
     draggedItem.classList.add("dragging");
@@ -215,7 +288,8 @@ if (itemInput && addItemButton && itemList && listTitle) {
     if (!draggedItem || event.pointerId !== activePointerId) return;
 
     event.preventDefault();
-    const afterElement = getDragAfterElement(itemList, event.clientY);
+    const afterElement = getItemAfterElement(itemList, event.clientY);
+
     if (afterElement) {
       itemList.insertBefore(draggedItem, afterElement);
     } else {
@@ -227,96 +301,18 @@ if (itemInput && addItemButton && itemList && listTitle) {
   itemList.addEventListener("pointercancel", finishItemDrag);
   itemList.addEventListener("lostpointercapture", finishItemDrag);
 
-  addItemButton.addEventListener("click", () => {
-    const itemName = itemInput.value.trim();
+  addItemButton.addEventListener("click", (event) => {
+    event.preventDefault();
 
-    if (!itemName) {
+    const name = itemInput.value.trim();
+    if (!name) {
       itemInput.focus();
       return;
     }
 
-    savedItems.push(itemName);
-    localStorage.setItem(itemStorageKey, JSON.stringify(savedItems));
-    itemList.append(createItemElement(itemName));
+    itemList.append(createItem(name));
+    saveItemsFromDom();
     itemInput.value = "";
     itemInput.focus();
   });
-}
-const list = document.getElementById('sortable-list');
-if (list) {
-let draggingItem = null;
-let nextItem = null;
-
-// Функція, яка визначає, над яким елементом зараз знаходиться палець/мишка
-function getDragAfterElement(container, y) {
-    const draggableElements = [...container.querySelectorAll('.list-item:not(.dragging)')];
-
-    return draggableElements.reduce((closest, child) => {
-        const box = child.getBoundingClientRect();
-        const offset = y - box.top - box.height / 2;
-        if (offset < 0 && offset > closest.offset) {
-            return { offset: offset, element: child };
-        } else {
-            return closest;
-        }
-    }, { offset: Number.NEGATIVE_INFINITY }).element;
-}
-
-// 1. Коли ми натиснули (або затиснули пальцем)
-list.addEventListener('pointerdown', (e) => {
-    // Шукаємо, чи натиснули ми саме на ручку (drag-handle)
-    const handle = e.target.closest('.drag-handle');
-    if (!handle) return; // Якщо ні, ігноруємо
-
-    // Знаходимо батьківський елемент списку
-    draggingItem = handle.closest('.list-item');
-    if (!draggingItem) return;
-
-    // Захоплюємо pointer, щоб події pointermove спрацьовували, навіть якщо палець вийде за межі елемента
-    e.target.setPointerCapture(e.pointerId);
-    
-    // Додаємо клас для візуального ефекту (стає напівпрозорим)
-    // setTimeout потрібен, щоб браузер встиг відрендерити стан ДО початку руху
-    setTimeout(() => {
-        draggingItem.classList.add('dragging');
-    }, 0);
-});
-
-// 2. Коли ми рухаємо пальцем/мишкою
-list.addEventListener('pointermove', (e) => {
-    if (!draggingItem) return; // Якщо нічого не тагнемо, виходимо
-    
-    e.preventDefault(); // Запобігаємо скролу сторінки на телефоні!
-
-    // Знаходимо елемент, після якого треба вставити той, що тагнемо
-    const afterElement = getDragAfterElement(list, e.clientY);
-    
-    if (afterElement == null) {
-        // Якщо ми в самому низу списку
-        list.appendChild(draggingItem);
-    } else {
-        // Вставляємо перед знайденим елементом
-        list.insertBefore(draggingItem, afterElement);
-    }
-});
-
-// 3. Коли ми відпустили палець/мишку
-list.addEventListener('pointerup', (e) => {
-    if (!draggingItem) return;
-    
-    // Відпускаємо pointer
-    e.target.releasePointerCapture(e.pointerId);
-    
-    // Прибираємо клас для візуального ефекту
-    draggingItem.classList.remove('dragging');
-    draggingItem = null;
-});
-
-// Також обробляємо відміну pointer (наприклад, якщо тач перервався дзвінком)
-list.addEventListener('pointercancel', (e) => {
-    if (!draggingItem) return;
-    e.target.releasePointerCapture(e.pointerId);
-    draggingItem.classList.remove('dragging');
-    draggingItem = null;
-});
 }

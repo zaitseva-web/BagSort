@@ -63,3 +63,14 @@ h1 {
 .drag-handle:active {
     cursor: grabbing;
 }
+
+.topic {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.topic.dragging {
+  cursor: grabbing;
+  opacity: 0.5;
+}
