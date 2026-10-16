@@ -237,6 +237,13 @@ if (contentContainer) {
 
     const afterElement = others.find((element) => {
       const bounds = element.getBoundingClientRect();
+      const isSameRow =
+        event.clientY >= bounds.top && event.clientY <= bounds.bottom;
+
+      if (isSameRow) {
+        return event.clientX < bounds.left + bounds.width / 2;
+      }
+
       return event.clientY < bounds.top + bounds.height / 2;
     });
 
