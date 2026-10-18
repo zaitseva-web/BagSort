@@ -10,11 +10,16 @@
 <body class="inside-list-background">
     <h1 id="list-title"> {listName} </h1>
     <main>
-        <input type="text" id="item-input" placeholder="Enter item...">
-        <button type="button" id="add-item-button">Add Item</button>
-        <input type="text" id="topic" placeholder="Enter topic...">
-        <button type="button" id="add-topic-button">Add Topic</button>
-        <ul id="topic" class="topic"></ul>
+        <button type="button" id="show-item-input-button">Add Item</button>
+        <div id="item-editor" hidden>
+            <input type="text" id="item-input" placeholder="Enter item...">
+            <button type="button" id="add-item-button">Save Item</button>
+        </div>
+        <button type="button" id="show-topic-input-button">Add Topic</button>
+        <div id="topic-editor" hidden>
+            <input type="text" id="topic-input" placeholder="Enter topic...">
+            <button type="button" id="add-topic-button">Save Topic</button>
+        </div>
         <ul id="topic-list" class="topic-list"></ul>
         <ul id="item-list" class="item-list"></ul>
         <a href="index.html">Back to lists</a>

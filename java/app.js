@@ -2,13 +2,17 @@ const listNameInput = document.getElementById("list_name");
 const createListButton = document.getElementById("create-list-button");
 const listsContainer = document.getElementById("lists");
 
-const topicInput = document.getElementById("topic");
+const topicInput = document.getElementById("topic-input");
 const addTopicButton = document.getElementById("add-topic-button");
 const topicList = document.getElementById("topic-list");
+const showTopicInputButton = document.getElementById("show-topic-input-button");
+const topicEditor = document.getElementById("topic-editor");
 const itemList = topicList || document.getElementById("item-list");
 
 const itemInput = document.getElementById("item-input");
 const addItemButton = document.getElementById("add-item-button");
+const showItemInputButton = document.getElementById("show-item-input-button");
+const itemEditor = document.getElementById("item-editor");
 const listTitle = document.getElementById("list-title");
 
 const listStorageKey = "lists";
@@ -112,6 +116,14 @@ function createItem(name) {
 
 const contentContainer = topicList || document.getElementById("item-list");
 
+if (showTopicInputButton && topicEditor) {
+  showTopicInputButton.addEventListener("click", () => {
+    topicEditor.hidden = false;
+    showTopicInputButton.hidden = true;
+    topicInput?.focus();
+  });
+}
+
 if (contentContainer) {
   const listName = getCurrentListName();
   const contentStorageKey = `content:${listName}`;
@@ -190,11 +202,23 @@ if (contentContainer) {
       contentContainer.append(createTopic(name));
       saveContent();
       topicInput.value = "";
-      topicInput.focus();
+      if (topicEditor && showTopicInputButton) {
+        topicEditor.hidden = true;
+        showTopicInputButton.hidden = false;
+        showTopicInputButton.focus();
+      }
     });
   }
 
   if (itemInput && addItemButton) {
+    if (showItemInputButton && itemEditor) {
+      showItemInputButton.addEventListener("click", () => {
+        itemEditor.hidden = false;
+        showItemInputButton.hidden = true;
+        itemInput.focus();
+      });
+    }
+
     addItemButton.addEventListener("click", (event) => {
       event.preventDefault();
 
@@ -207,7 +231,11 @@ if (contentContainer) {
       contentContainer.append(createItem(name));
       saveContent();
       itemInput.value = "";
-      itemInput.focus();
+      if (itemEditor && showItemInputButton) {
+        itemEditor.hidden = true;
+        showItemInputButton.hidden = false;
+        showItemInputButton.focus();
+      }
     });
   }
 

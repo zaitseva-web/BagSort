@@ -10,11 +10,12 @@ h1 {
     background: #368136;
 
 }
-.index-background {
-    margin-inline: 0;
+.index {
+
+    margin: 1rem;
     padding-inline: 0;
     list-style-type: none;
-    background: #f38e14;
+    background: #846846;
 }
 .inside-list-item-border {
     border: 0.200rem solid #cab3b3;
