@@ -15,12 +15,15 @@ const showItemInputButton = document.getElementById("show-item-input-button");
 const itemEditor = document.getElementById("item-editor");
 const listTitle = document.getElementById("list-title");
 
+// Ключи для хранения данных в localStorage
 const listStorageKey = "lists";
+const contentStorageKey = "content";
 let savedItems = [];
 let itemStorageKey = "";
 let draggedItem = null;
 let activePointerId = null;
 
+// Функции для работы с localStorage
 function readArray(key) {
   try {
     const value = JSON.parse(localStorage.getItem(key) || "[]");
@@ -30,6 +33,7 @@ function readArray(key) {
   }
 }
 
+// Сохраняет массив в localStorage
 function saveArray(key, values) {
   try {
     localStorage.setItem(key, JSON.stringify(values));
@@ -38,10 +42,12 @@ function saveArray(key, values) {
   }
 }
 
+// Получает имя текущего списка из параметров URL
 function getCurrentListName() {
   return new URLSearchParams(window.location.search).get("list") || "Список";
 }
 
+// Создает элемент списка с ссылкой на страницу внутри списка
 function createListCard(name) {
   const listItem = document.createElement("li");
   const link = document.createElement("a");
@@ -52,6 +58,7 @@ function createListCard(name) {
   title.className = "list-card__title";
   title.textContent = name;
 
+  // Добавляем стрелку в конец ссылки
   const arrow = document.createElement("span");
   arrow.className = "list-card__arrow";
   arrow.setAttribute("aria-hidden", "true");
@@ -62,12 +69,13 @@ function createListCard(name) {
   return listItem;
 }
 
+// Загружает сохраненные списки и отображает их на странице
 if (listsContainer) {
   readArray(listStorageKey)
     .filter((name) => typeof name === "string")
     .forEach((name) => listsContainer.append(createListCard(name)));
 }
-
+// Обработчик события для кнопки создания нового списка
 if (listsContainer && createListButton && listNameInput) {
   createListButton.addEventListener("click", (event) => {
     event.preventDefault();
@@ -77,7 +85,7 @@ if (listsContainer && createListButton && listNameInput) {
       listNameInput.focus();
       return;
     }
-
+// Проверяем, существует ли уже список с таким именем
     listsContainer.append(createListCard(name));
 
     const lists = readArray(listStorageKey)
@@ -90,13 +98,14 @@ if (listsContainer && createListButton && listNameInput) {
   });
 }
 
+// Создает название группы (топика) внутри списка
 function createTopic(name) {
   const topic = document.createElement("h3");
   topic.className = "topic";
   topic.textContent = name;
   return topic;
 }
-
+// Создает элемент списка внутри группы (топика)
 function createItem(name) {
   const item = document.createElement("div");
   item.className = "item inside-list-item-border";
@@ -113,9 +122,9 @@ function createItem(name) {
   item.append(itemName, handle);
   return item;
 }
-
+// Определяем контейнер для контента (топики и элементы)
 const contentContainer = topicList || document.getElementById("item-list");
-
+//  для отображения и скрытия добавления топиков и элементов
 if (showTopicInputButton && topicEditor) {
   showTopicInputButton.addEventListener("click", () => {
     topicEditor.hidden = false;
@@ -124,12 +133,13 @@ if (showTopicInputButton && topicEditor) {
   });
 }
 
+//  для отображения и скрытия добавления элементов
 if (contentContainer) {
   const listName = getCurrentListName();
   const contentStorageKey = `content:${listName}`;
   let draggedElement = null;
   let activeContentPointerId = null;
-
+// Функция для получения текущего контента (топики и элементы) в виде массива объектов
   function getContent() {
     return Array.from(contentContainer.children)
       .filter((element) =>
@@ -144,7 +154,7 @@ if (contentContainer) {
       }))
       .filter((entry) => entry.name);
   }
-
+// Функция для сохранения текущего контента в localStorage
   function saveContent() {
     saveArray(contentStorageKey, getContent());
   }
@@ -158,7 +168,7 @@ if (contentContainer) {
       contentContainer.append(createItem(entry.name.trim()));
     }
   }
-
+// Загружаем сохраненный контент из localStorage и фильтруем его
   let savedContent = readArray(contentStorageKey).filter(
     (entry) =>
       entry &&
@@ -180,7 +190,7 @@ if (contentContainer) {
 
     savedContent = [...oldTopics, ...oldItems];
   }
-
+// Добавляем сохраненный контент на страницу и сохраняем его в localStorage
   savedContent.forEach(addContent);
   saveContent();
 
@@ -188,7 +198,7 @@ if (contentContainer) {
     listTitle.textContent = listName;
     document.title = listName;
   }
-
+// Обработчики событий для добавления топиков и элементов
   if (topicInput && addTopicButton && topicList) {
     addTopicButton.addEventListener("click", (event) => {
       event.preventDefault();
@@ -198,7 +208,7 @@ if (contentContainer) {
         topicInput.focus();
         return;
       }
-
+// Добавляем новый топик в контейнер и сохраняем его
       contentContainer.append(createTopic(name));
       saveContent();
       topicInput.value = "";
@@ -209,7 +219,7 @@ if (contentContainer) {
       }
     });
   }
-
+// Обработчики событий для добавления элементов
   if (itemInput && addItemButton) {
     if (showItemInputButton && itemEditor) {
       showItemInputButton.addEventListener("click", () => {
@@ -218,7 +228,7 @@ if (contentContainer) {
         itemInput.focus();
       });
     }
-
+// Обработчик события для кнопки добавления элемента
     addItemButton.addEventListener("click", (event) => {
       event.preventDefault();
 
@@ -227,7 +237,7 @@ if (contentContainer) {
         itemInput.focus();
         return;
       }
-
+// Добавляем новый элемент в контейнер и сохраняем его
       contentContainer.append(createItem(name));
       saveContent();
       itemInput.value = "";
@@ -238,7 +248,7 @@ if (contentContainer) {
       }
     });
   }
-
+// Обработчики событий для перетаскивания топиков и элементов
   contentContainer.addEventListener("pointerdown", (event) => {
     if (!event.isPrimary || (event.pointerType === "mouse" && event.button !== 0)) {
       return;
@@ -292,7 +302,7 @@ if (contentContainer) {
     activeContentPointerId = null;
     saveContent();
   }
-
+// Обработчики событий для завершения перетаскивания
   contentContainer.addEventListener("pointerup", finishDrag);
   contentContainer.addEventListener("pointercancel", finishDrag);
   contentContainer.addEventListener("lostpointercapture", finishDrag);
