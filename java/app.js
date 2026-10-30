@@ -8,6 +8,8 @@ const topicList = document.getElementById("topic-list");
 const showTopicInputButton = document.getElementById("show-topic-input-button");
 const topicEditor = document.getElementById("topic-editor");
 const itemList = topicList || document.getElementById("item-list");
+const deleteItemButton = document.getElementById('delete-item-button');
+
 
 const itemInput = document.getElementById("item-input");
 const addItemButton = document.getElementById("add-item-button");
@@ -121,6 +123,9 @@ function createItem(name) {
 
   item.append(itemName, handle);
   return item;
+}
+function buttonDeleteItem() {
+
 }
 // Определяем контейнер для контента (топики и элементы)
 const contentContainer = topicList || document.getElementById("item-list");
