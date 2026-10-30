@@ -8,8 +8,6 @@ const topicList = document.getElementById("topic-list");
 const showTopicInputButton = document.getElementById("show-topic-input-button");
 const topicEditor = document.getElementById("topic-editor");
 const itemList = topicList || document.getElementById("item-list");
-const deleteItemButton = document.getElementById('delete-item-button');
-
 
 const itemInput = document.getElementById("item-input");
 const addItemButton = document.getElementById("add-item-button");
@@ -121,12 +119,16 @@ function createItem(name) {
   handle.setAttribute("aria-hidden", "true");
   handle.textContent = "☰";
 
-  item.append(itemName, handle);
+  const deleteButton = document.createElement("button");
+  deleteButton.type = "button";
+  deleteButton.className = "item-delete-button";
+  deleteButton.setAttribute("aria-label", "Удалить элемент");
+  deleteButton.textContent = "×";
+
+  item.append(itemName, handle, deleteButton);
   return item;
 }
-function buttonDeleteItem() {
 
-}
 // Определяем контейнер для контента (топики и элементы)
 const contentContainer = topicList || document.getElementById("item-list");
 //  для отображения и скрытия добавления топиков и элементов
@@ -163,6 +165,17 @@ if (contentContainer) {
   function saveContent() {
     saveArray(contentStorageKey, getContent());
   }
+
+  contentContainer.addEventListener("click", (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    const deleteButton = target?.closest(".item-delete-button");
+    const item = deleteButton?.closest(".item");
+
+    if (!item || !contentContainer.contains(item)) return;
+
+    item.remove();
+    saveContent();
+  });
 
   function addContent(entry) {
     if (!entry || typeof entry.name !== "string" || !entry.name.trim()) return;
@@ -260,6 +273,8 @@ if (contentContainer) {
     }
 
     const target = event.target instanceof Element ? event.target : null;
+    if (target?.closest(".item-delete-button")) return;
+
     const element = target?.closest(".topic, .item");
 
     if (!element || !contentContainer.contains(element)) return;

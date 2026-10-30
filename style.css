@@ -40,6 +40,7 @@ h1 {
     transition: opacity 0.2s, box-shadow 0.2s, transform 0.2s;
 }
 
+
 .item.dragging {
     opacity: 0.5;
     background-color: #99c3c9;
@@ -49,14 +50,15 @@ h1 {
 
 .item__name {
     overflow-wrap: anywhere;
+    flex : 1;
 }
 
 .drag-handle {
-    flex: 0 0 30px;
-    display: flex;
-    align-items: center;
+    flex: 0 0 5px;
+    display: contents;
+    align-items: end;
     justify-content: center;
-    color: #777;
+    color: #000000;
     cursor: grab;
     touch-action: none;
     user-select: none;
@@ -64,6 +66,18 @@ h1 {
 
 .drag-handle:active {
     cursor: grabbing;
+}
+
+.item-delete-button {
+    flex: 0 0 30px;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: #8b2f2f;
+    font: inherit;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
 }
 
 .topic {
