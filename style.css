@@ -110,3 +110,18 @@ h1 {
     width: 35%;
     box-sizing: border-box;
 }
+.lists {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+}
+.list-card {
+    display: block;
+    border: 0.5rem solid #719471;
+    margin: 0;
+    inline-size: fit-content;
+    max-inline-size: 100%;
+    writing-mode: horizontal-tb;
+    border-radius: 2rem;
+}
