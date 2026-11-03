@@ -125,3 +125,108 @@ h1 {
     writing-mode: horizontal-tb;
     border-radius: 2rem;
 }
+.edit-button {
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    padding: 5px 8px;
+    font-size: 16px;
+}
+
+.edit-button:hover {
+    opacity: 0.6;
+}
+.edit-input {
+    font: inherit;
+    padding: 6px 10px;
+    border: 2px solid #d6b5c5;
+    border-radius: 8px;
+    outline: none;
+    background: white;
+    color: black;
+    min-width: 100px;
+    max-width: 70%;
+}
+
+.edit-input:focus {
+    border-color: #557fbd;
+}
+
+.save-button,
+.cancel-button {
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    margin-left: 5px;
+}
+
+.save-button {
+    color: #176b32;
+}
+
+.cancel-button {
+    color: #c0392b;
+}
+
+.topic-delete-button {
+    flex: 0 0 30px;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: #8b2f2f;
+    font: inherit;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+
+
+/* Адаптация редактирования для телефонов */
+@media (max-width: 600px) {
+  .item,
+  .topic {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .edit-input {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    font-size: 16px;
+  }
+
+  .save-button,
+  .cancel-button {
+    font-size: 20px;
+    padding: 8px;
+    margin-left: 2px;
+  }
+
+  .edit-button {
+    padding: 8px;
+    font-size: 20px;
+  }
+
+  .drag-handle {
+    padding: 8px;
+    font-size: 20px;
+  }
+}
+.item,
+.topic {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.item__name,
+.topic__name {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}

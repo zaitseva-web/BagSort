@@ -41,39 +41,110 @@ function saveArray(key, values) {
     // Хранилище может быть недоступно.
   }
 }
+// Создаёт уникальный ID
+function createId() {
+  if (crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+
+  return Date.now().toString(36) +
+    Math.random().toString(36).slice(2);
+}
+
+// Получает списки и переносит старый формат в новый
+function getLists() {
+  const oldLists = readArray(listStorageKey);
+
+  const newLists = oldLists.map((list) => {
+    // Если список уже имеет ID, оставляем его
+    if (
+      list &&
+      typeof list === "object" &&
+      list.id &&
+      typeof list.name === "string"
+    ) {
+      return list;
+    }
+
+    // Если раньше список был просто строкой,
+    // создаём для него ID
+    return {
+      id: createId(),
+      name: String(list)
+    };
+  });
+
+  // Сохраняем новый формат
+  saveArray(listStorageKey, newLists);
+
+  return newLists;
+}
 
 // Получает имя текущего списка из параметров URL
-function getCurrentListName() {
-  return new URLSearchParams(window.location.search).get("list") || "Список";
+function getCurrentListId() {
+  const params = new URLSearchParams(window.location.search);
+
+  return params.get("listId");
 }
 
 // Создает элемент списка с ссылкой на страницу внутри списка
-function createListCard(name) {
+function createListCard(name, id) {
   const listItem = document.createElement("li");
+
   const link = document.createElement("a");
   link.className = "list-card";
-  link.href = `inside_list.html?list=${encodeURIComponent(name)}`;
+  link.href = `inside_list.html?listId=${encodeURIComponent(id)}`;
 
   const title = document.createElement("span");
   title.className = "list-card__title";
   title.textContent = name;
 
-  // Добавляем стрелку в конец ссылки
   const arrow = document.createElement("span");
   arrow.className = "list-card__arrow";
-  arrow.setAttribute("aria-hidden", "true");
   arrow.textContent = "→";
 
   link.append(title, arrow);
-  listItem.append(link);
+
+  // Кнопка редактирования
+  const editButton = document.createElement("button");
+  editButton.type = "button";
+  editButton.textContent = "✎";
+  editButton.className = "edit-button";
+
+  editButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const newName = prompt("New name:", name);
+
+    if (newName === null || !newName.trim()) return;
+
+    const lists = getLists();
+
+    const currentList = lists.find((list) => list.id === id);
+
+    if (!currentList) return;
+
+    currentList.name = newName.trim();
+
+    saveArray(listStorageKey, lists);
+
+    title.textContent = currentList.name;
+  });
+
+  listItem.append(link, editButton);
+
   return listItem;
 }
-
 // Загружает сохраненные списки и отображает их на странице
 if (listsContainer) {
-  readArray(listStorageKey)
-    .filter((name) => typeof name === "string")
-    .forEach((name) => listsContainer.append(createListCard(name)));
+  const lists = getLists();
+
+  lists.forEach((list) => {
+    listsContainer.append(
+      createListCard(list.name, list.id)
+    );
+  });
 }
 // Обработчик события для кнопки создания нового списка
 if (listsContainer && createListButton && listNameInput) {
@@ -81,17 +152,26 @@ if (listsContainer && createListButton && listNameInput) {
     event.preventDefault();
 
     const name = listNameInput.value.trim();
+
     if (!name) {
       listNameInput.focus();
       return;
     }
-// Проверяем, существует ли уже список с таким именем
-    listsContainer.append(createListCard(name));
 
-    const lists = readArray(listStorageKey)
-      .filter((savedName) => typeof savedName === "string");
-    lists.push(name);
+    const lists = getLists();
+
+    const newList = {
+      id: createId(),
+      name: name
+    };
+
+    lists.push(newList);
+
     saveArray(listStorageKey, lists);
+
+    listsContainer.append(
+      createListCard(newList.name, newList.id)
+    );
 
     listNameInput.value = "";
     listNameInput.focus();
@@ -99,13 +179,35 @@ if (listsContainer && createListButton && listNameInput) {
 }
 
 // Создает название группы (топика) внутри списка
+// Создаём топик
 function createTopic(name) {
   const topic = document.createElement("h3");
   topic.className = "topic";
-  topic.textContent = name;
+
+  const title = document.createElement("span");
+  title.className = "topic__name";
+  title.textContent = name;
+
+  const editButton = document.createElement("button");
+  editButton.type = "button";
+  editButton.className = "edit-button";
+  editButton.textContent = "✎";
+
+  const deleteButton = document.createElement("button");
+  deleteButton.type = "button";
+  deleteButton.className = "topic-delete-button";
+  deleteButton.setAttribute("aria-label", "delete topic");
+  deleteButton.textContent = "×";
+
+  const handle = document.createElement("span");
+  handle.className = "drag-handle";
+  handle.textContent = "☰";
+  topic.append(title, handle, editButton,  deleteButton);
+
   return topic;
 }
-// Создает элемент списка внутри группы (топика)
+
+// Создаём элемент
 function createItem(name) {
   const item = document.createElement("div");
   item.className = "item inside-list-item-border";
@@ -114,20 +216,29 @@ function createItem(name) {
   itemName.className = "item__name";
   itemName.textContent = name;
 
+  // Кнопка редактирования
+  const editButton = document.createElement("button");
+  editButton.type = "button";
+  editButton.className = "edit-button";
+  editButton.textContent = "✎";
+
+  // Ручка для перетаскивания
   const handle = document.createElement("span");
   handle.className = "drag-handle";
-  handle.setAttribute("aria-hidden", "true");
   handle.textContent = "☰";
 
   const deleteButton = document.createElement("button");
   deleteButton.type = "button";
   deleteButton.className = "item-delete-button";
-  deleteButton.setAttribute("aria-label", "Удалить элемент");
+  deleteButton.setAttribute("aria-label", "Delete item");
   deleteButton.textContent = "×";
 
-  item.append(itemName, handle, deleteButton);
+
+  item.append(itemName, handle, editButton,  deleteButton);
+
   return item;
 }
+
 
 // Определяем контейнер для контента (топики и элементы)
 const contentContainer = topicList || document.getElementById("item-list");
@@ -142,8 +253,17 @@ if (showTopicInputButton && topicEditor) {
 
 //  для отображения и скрытия добавления элементов
 if (contentContainer) {
-  const listName = getCurrentListName();
-  const contentStorageKey = `content:${listName}`;
+  const listId = getCurrentListId();
+
+  const lists = getLists();
+
+  const currentList = lists.find(
+    (list) => list.id === listId
+  );
+
+  const listName = currentList?.name || "List";
+
+  const contentStorageKey = `content:${listId}`;
   let draggedElement = null;
   let activeContentPointerId = null;
 // Функция для получения текущего контента (топики и элементы) в виде массива объектов
@@ -156,7 +276,7 @@ if (contentContainer) {
       .map((element) => ({
         type: element.classList.contains("topic") ? "topic" : "item",
         name: element.classList.contains("topic")
-          ? element.textContent.trim()
+          ? element.querySelector(".topic__name")?.textContent.trim() || ""
           : element.querySelector(".item__name")?.textContent.trim() || ""
       }))
       .filter((entry) => entry.name);
@@ -176,6 +296,114 @@ if (contentContainer) {
     item.remove();
     saveContent();
   });
+    contentContainer.addEventListener("click", (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    const deleteButton = target?.closest(".topic-delete-button");
+    const item = deleteButton?.closest(".topic");
+
+    if (!item || !contentContainer.contains(item)) return;
+
+    item.remove();
+    saveContent();
+  });
+// Редактирование прямо в строке
+    contentContainer.addEventListener("click", (event) => {
+      const target = event.target;
+
+      if (!(target instanceof Element)) return;
+
+      const editButton = target.closest(".edit-button");
+
+      if (!editButton) return;
+
+      const element = editButton.closest(".topic, .item");
+
+      if (!element) return;
+
+      const nameElement = element.classList.contains("topic")
+        ? element.querySelector(".topic__name")
+        : element.querySelector(".item__name");
+
+      if (!nameElement) return;
+
+      // Не открываем повторное редактирование
+      if (element.querySelector(".edit-input")) return;
+
+      const oldName = nameElement.textContent;
+
+      // Создаём поле ввода
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "edit-input";
+      input.value = oldName;
+
+      // Кнопка сохранения
+      const saveButton = document.createElement("button");
+      saveButton.type = "button";
+      saveButton.textContent = "✓";
+      saveButton.className = "save-button";
+
+      // Кнопка отмены
+      const cancelButton = document.createElement("button");
+      cancelButton.type = "button";
+      cancelButton.textContent = "✕";
+      cancelButton.className = "cancel-button";
+
+      // Скрываем старое название и карандаш
+      nameElement.hidden = true;
+      editButton.hidden = true;
+
+      // Добавляем новые элементы
+      element.append(input, saveButton, cancelButton);
+
+      input.focus();
+      input.select();
+
+      // Сохраняем изменения
+      function saveEdit() {
+        const newName = input.value.trim();
+
+        if (!newName) {
+          input.focus();
+          return;
+        }
+
+        nameElement.textContent = newName;
+
+        finishEdit();
+        saveContent();
+      }
+
+      // Отменяем изменения
+      function cancelEdit() {
+        finishEdit();
+      }
+
+      // Возвращаем обычный вид
+      function finishEdit() {
+        input.remove();
+        saveButton.remove();
+        cancelButton.remove();
+
+        nameElement.hidden = false;
+        editButton.hidden = false;
+      }
+
+      saveButton.addEventListener("click", saveEdit);
+      cancelButton.addEventListener("click", cancelEdit);
+
+      // Enter — сохранить
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          saveEdit();
+        }
+
+        // Escape — отменить
+        if (event.key === "Escape") {
+          cancelEdit();
+        }
+      });
+    });
 
   function addContent(entry) {
     if (!entry || typeof entry.name !== "string" || !entry.name.trim()) return;
@@ -187,27 +415,45 @@ if (contentContainer) {
     }
   }
 // Загружаем сохраненный контент из localStorage и фильтруем его
-  let savedContent = readArray(contentStorageKey).filter(
-    (entry) =>
-      entry &&
-      (entry.type === "topic" || entry.type === "item") &&
-      typeof entry.name === "string"
-  );
+ let savedContent = readArray(contentStorageKey);
 
-  // Перенос данных из старых хранилищ при первом запуске этой версии.
+// Если нового хранилища ещё нет,
+// пробуем найти старое по названию
+if (savedContent.length === 0 && listName !== "Список") {
+  savedContent = readArray(`content:${listName}`);
+
+  // Если старого общего хранилища нет,
+  // пробуем отдельные хранилища топиков и элементов
   if (savedContent.length === 0) {
     const oldTopics = topicList
       ? readArray(`topics:${listName}`)
           .filter((name) => typeof name === "string")
-          .map((name) => ({ type: "topic", name }))
+          .map((name) => ({
+            type: "topic",
+            name: name
+          }))
       : [];
 
     const oldItems = readArray(`items:${listName}`)
       .filter((name) => typeof name === "string")
-      .map((name) => ({ type: "item", name }));
+      .map((name) => ({
+        type: "item",
+        name: name
+      }));
 
     savedContent = [...oldTopics, ...oldItems];
   }
+
+  // Сохраняем перенесённые данные по новому ID
+  saveArray(contentStorageKey, savedContent);
+}
+
+savedContent = savedContent.filter(
+  (entry) =>
+    entry &&
+    (entry.type === "topic" || entry.type === "item") &&
+    typeof entry.name === "string"
+);
 // Добавляем сохраненный контент на страницу и сохраняем его в localStorage
   savedContent.forEach(addContent);
   saveContent();
@@ -266,16 +512,48 @@ if (contentContainer) {
       }
     });
   }
+  // Редактирование топиков и элементов
+contentContainer.addEventListener("click", (event) => {
+  const button = event.target.closest(".edit-button");
+
+  if (!button) return;
+
+  const element = button.closest(".topic, .item");
+
+  if (!element) return;
+
+  const nameElement = element.classList.contains("topic")
+    ? element.querySelector(".topic__name")
+    : element.querySelector(".item__name");
+
+  const oldName = nameElement.textContent;
+
+  
+
+  if (newName === null || !newName.trim()) return;
+
+  nameElement.textContent = newName.trim();
+
+  saveContent();
+});
 // Обработчики событий для перетаскивания топиков и элементов
   contentContainer.addEventListener("pointerdown", (event) => {
     if (!event.isPrimary || (event.pointerType === "mouse" && event.button !== 0)) {
       return;
     }
-
     const target = event.target instanceof Element ? event.target : null;
-    if (target?.closest(".item-delete-button")) return;
 
-    const element = target?.closest(".topic, .item");
+    // Перетаскиваем только тогда, когда нажали на ручку ☰
+    const handle = target?.closest(".drag-handle");
+
+    if (!handle) return;
+
+    const element = handle.closest(".topic, .item");
+
+    if (!element || !contentContainer.contains(element)) return;
+
+    // Если нажали на кнопку редактирования, не начинаем перетаскивание
+    if (target?.closest(".edit-button")) return;
 
     if (!element || !contentContainer.contains(element)) return;
 
