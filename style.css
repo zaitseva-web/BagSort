@@ -18,7 +18,7 @@ h1 {
     background: #476790;
 }
 .inside-list-item-border {
-    border: 0.200rem solid #cab3b3;
+    border: 6px solid #cab3b3;
     border-radius: 90px;
     padding: 1rem;
     margin: 1rem auto;
@@ -53,10 +53,15 @@ h1 {
     flex : 1;
 }
 
+.item__name mark {
+    background-color: #ffeb3b;
+    color: inherit;
+}
+
 .drag-handle {
-    flex: 0 0 5px;
-    display: contents;
-    align-items: end;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
     justify-content: center;
     color: #000000;
     cursor: grab;
@@ -69,7 +74,7 @@ h1 {
 }
 
 .item-delete-button {
-    flex: 0 0 30px;
+    flex: 0 0 auto;
     border: 0;
     padding: 0;
     background: transparent;
@@ -101,12 +106,12 @@ h1 {
 
 .topic.dragging {
   cursor: grabbing;
-  opacity: 0.5rem;
+  opacity: 0.5;
 }
 .inside-list-topic-border {
     padding: 0.5rem;
     margin: 2rem auto;
-    border: 3rem;
+    border: 3px;
     width: 35%;
     box-sizing: border-box;
 }
@@ -180,7 +185,13 @@ h1 {
     line-height: 1;
     cursor: pointer;
 }
-
+.inside-list-show-item-input-button {
+    
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    background-color: #a32b2b;
+}
 
 
 /* Адаптация редактирования для телефонов */

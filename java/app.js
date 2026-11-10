@@ -2,17 +2,19 @@ const listNameInput = document.getElementById("list_name");
 const createListButton = document.getElementById("create-list-button");
 const listsContainer = document.getElementById("lists");
 
-const topicInput = document.getElementById("topic-input");
+const topicInput = document.getElementById("inside-list-topic-input");
 const addTopicButton = document.getElementById("add-topic-button");
 const topicList = document.getElementById("topic-list");
-const showTopicInputButton = document.getElementById("show-topic-input-button");
+const showTopicInputButton = document.querySelector(".inside-list-show-topic-input-button");
 const topicEditor = document.getElementById("topic-editor");
 const itemList = topicList || document.getElementById("item-list");
 
 const itemInput = document.getElementById("item-input");
 const addItemButton = document.getElementById("add-item-button");
-const showItemInputButton = document.getElementById("show-item-input-button");
+const showItemInputButton = document.querySelector(".inside-list-show-item-input-button");
 const itemEditor = document.getElementById("item-editor");
+const itemSearchInput = document.getElementById("item-search");
+const itemSearchButton = document.getElementById("item-search-button");
 const listTitle = document.getElementById("list-title");
 
 // Ключи для хранения данных в localStorage
@@ -281,9 +283,92 @@ if (contentContainer) {
       }))
       .filter((entry) => entry.name);
   }
+// Функция для фильтрации элементов по поисковому запросу
+  let searchHighlightAnimation = null;
+
+  function filterItems(shouldScrollToMatch = false) {
+    const searchTerms = itemSearchInput?.value
+      .trim()
+      .toLocaleLowerCase()
+      .split(/\s+/)
+      .filter(Boolean) || [];
+    const searchTerm = searchTerms.join(" ");
+    let firstMatch = null;
+    let exactMatch = null;
+
+    contentContainer.querySelectorAll(".item").forEach((item) => {
+      const nameElement = item.querySelector(".item__name");
+      if (!nameElement) return;
+
+      const originalName = nameElement.textContent.trim();
+      const normalizedName = originalName.toLocaleLowerCase();
+      const matchingTerms = searchTerms.filter((term) => normalizedName.includes(term));
+      item.hidden = searchTerms.length > 0 && matchingTerms.length === 0;
+      renderItemSearchMatches(nameElement, originalName, matchingTerms);
+
+      if (!item.hidden && !firstMatch) {
+        firstMatch = item;
+      }
+
+      if (normalizedName === searchTerm) {
+        exactMatch = item;
+      }
+    });
+
+    if (!shouldScrollToMatch) return;
+
+    searchHighlightAnimation?.cancel();
+
+    const matchToShow = exactMatch || firstMatch;
+
+    if (!searchTerm || !matchToShow) return;
+
+    matchToShow.scrollIntoView({ behavior: "smooth", block: "center" });
+    searchHighlightAnimation = matchToShow.animate(
+      [
+        { backgroundColor: "#ffeb3b", boxShadow: "0 0 0 4px #ffeb3b" },
+        {
+          backgroundColor: getComputedStyle(matchToShow).backgroundColor,
+          boxShadow: "0 0 0 0 transparent"
+        }
+      ],
+      { duration: 1000, easing: "ease-out" }
+    );
+  }
+
+  function renderItemSearchMatches(nameElement, name, matchingTerms) {
+    if (matchingTerms.length === 0) {
+      nameElement.textContent = name;
+      return;
+    }
+
+    const escapedTerms = matchingTerms
+      .sort((a, b) => b.length - a.length)
+      .map((term) => term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    const matcher = new RegExp(escapedTerms.join("|"), "gi");
+    const fragment = document.createDocumentFragment();
+    let lastIndex = 0;
+
+    for (const match of name.matchAll(matcher)) {
+      const matchIndex = match.index;
+      fragment.append(document.createTextNode(name.slice(lastIndex, matchIndex)));
+
+      const highlightedText = document.createElement("mark");
+      highlightedText.textContent = match[0];
+      fragment.append(highlightedText);
+      lastIndex = matchIndex + match[0].length;
+    }
+
+    fragment.append(document.createTextNode(name.slice(lastIndex)));
+    nameElement.replaceChildren(fragment);
+  }
+
+  itemSearchButton?.addEventListener("click", () => filterItems(true));
+
 // Функция для сохранения текущего контента в localStorage
   function saveContent() {
     saveArray(contentStorageKey, getContent());
+    filterItems();
   }
 
   contentContainer.addEventListener("click", (event) => {
@@ -529,7 +614,6 @@ contentContainer.addEventListener("click", (event) => {
   const oldName = nameElement.textContent;
 
   
-
   if (newName === null || !newName.trim()) return;
 
   nameElement.textContent = newName.trim();
@@ -605,3 +689,23 @@ contentContainer.addEventListener("click", (event) => {
   contentContainer.addEventListener("pointercancel", finishDrag);
   contentContainer.addEventListener("lostpointercapture", finishDrag);
 }
+
+contentContainer.addEventListener("click", (event) => {
+  const button = event.target.closest(".show-item-input-button");
+
+  if (!button) return;
+  if (inside-list-show-item-input-button) {
+    itemEditor.hidden = false;
+    showItemInputButton.hidden = true;
+    itemInput.focus();
+  }
+});
+contentContainer.addEventListener("click", (event) => {
+  const button = event.target.closest(".show-topic-input-button");
+  if (!button) return;
+  if (inside-list-show-topic-input-button) {
+    topicEditor.hidden = false;
+    showTopicInputButton.hidden = true;
+    topicInput.focus();
+  }
+});
