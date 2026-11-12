@@ -168,7 +168,7 @@ function createListCard(name, id) {
   arrow.className = "list-card__arrow";
   arrow.textContent = "→";
 
-  link.append(title, arrow);
+  link.append(title);
 
   const editButton = document.createElement("button");
   editButton.type = "button";
