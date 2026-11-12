@@ -10,12 +10,157 @@ h1 {
     background: #5aa65a;
 
 }
-.index {
+/* Стили для главной страницы */
+body.index {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at 20% 20%, #1e1b4b 0%, #090d16 50%, #030712 100%);
+  color: #f3f4f6;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
 
-    margin: 1rem;
-    padding-inline: 0;
-    list-style-type: none;
-    background: #476790;
+/* Главный контейнер выстраивает всё строго по центру колонкой */
+.app-container {
+  width: 100%;
+  max-width: 540px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Шапка: заголовок слева, кнопка справа */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.app-header h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.025em;
+}
+
+/* Кнопка Login */
+body.index .login-button {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f3f4f6;
+  padding: 8px 18px;
+  border-radius: 99px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+body.index .login-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Блок создания списка */
+.create-box {
+  background: rgba(17, 24, 39, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+  width: 100%;
+}
+
+.create-box p, .lists-section > p {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #9ca3af;
+  margin: 0 0 12px 0;
+}
+
+.create-form {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.create-box input {
+  flex: 1;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.6);
+  color: #f3f4f6;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.create-box input:focus {
+  border-color: #719db1;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+}
+
+.create-box button {
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #4595b8 0%, #294f61 100%);
+  color: #0f172a;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s ease;
+}
+
+.create-box button:hover {
+  filter: brightness(1.1);
+}
+
+/* Секция со списками */
+.lists-section {
+  width: 100%;
+}
+
+ul.lists {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  cursor: pointer;
+}
+
+ul.lists li {
+  background: rgba(17, 24, 39, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 16px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+ul.lists li:hover {
+  border-color: rgba(56, 189, 248, 0.3);
+  transform: translateY(-2px);
+  cursor: pointer;
+}
+
+ul.lists li a {
+  color: #f3f4f6;
+  text-decoration: none;
+  font-weight: 500;
 }
 .inside-list-item-border {
     border: 6px solid #cab3b3;
@@ -115,15 +260,10 @@ h1 {
     width: 35%;
     box-sizing: border-box;
 }
-.lists {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start;
-}
+
 .list-card {
     display: block;
-    border: 0.5rem solid #719471;
+    
     margin: 0;
     inline-size: fit-content;
     max-inline-size: 100%;

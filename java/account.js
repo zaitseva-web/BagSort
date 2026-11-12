@@ -37,10 +37,14 @@
   });
 
   if (document.body.hasAttribute("data-load-app")) {
+    if (window.flowAppInitialized) return;
+    window.flowAppInitialized = true;
+
     window.flowAccountReady
       .then(() => {
         const appScript = document.createElement("script");
-        appScript.src = "java/app.js";
+        appScript.src = `java/app.js?v=${Date.now()}`;
+        appScript.async = false;
         document.body.append(appScript);
       })
       .catch((error) => {

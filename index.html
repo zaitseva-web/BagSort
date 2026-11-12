@@ -8,17 +8,30 @@
     <link rel='shortcut icon' href='images/favicone.svg' type='image/x-icon' />
 </head>
 <body class="index" data-load-app>
-    <a href="auth.html" class="login-button">Login</a>
-    <h1 id="top">Lists for you</h1>
-    <main>
-        <p>Create list</p>
-        <input type="text" id="list_name" placeholder="Enter list name...">
-        <button type="button" id="create-list-button">Create</button>
-
-        <p>Выберите список:</p>
-        <ul id="lists" class="lists"></ul>
+    <div class="app-container">
         
-    </main>
+        <!-- Шапка -->
+        <header class="app-header">
+            <h1 id="top">Lists for you</h1>
+            <a href="auth.html" class="login-button">Login</a>
+        </header>
+
+        <!-- Блок создания списка -->
+        <div class="create-box">
+            <p>Create list</p>
+            <div class="create-form">
+                <input type="text" id="list_name" placeholder="Enter list name...">
+                <button type="button" id="create-list-button">Create</button>
+            </div>
+        </div>
+
+        <!-- Секция со списками -->
+        <div class="lists-section">
+            <p>Выберите список:</p>
+            <ul id="lists" class="lists"></ul>
+        </div>
+
+    </div>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script>
     <script src="java/account.js"></script>

@@ -3,29 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Inside List</title>
     <link rel="stylesheet" href="style.css">
     <link rel='shortcut icon' href='images/favicone.svg' type='image/x-icon' />
 </head>
 <body class="inside-list-background" data-load-app>
-    <h1 id="list-title"> {listName} </h1>
-    <main>
-        <button type="button" class="inside-list-show-item-input-button">Add Item</button>
-        <div id="item-editor" hidden>
-            <input type="text" id="item-input" placeholder="Enter item...">
-            <button type="button" id="add-item-button">Save Item</button>
-        </div>
-        <button type="button" class="inside-list-show-topic-input-button">Add Topic</button>
-        <div id="topic-editor" hidden>
-            <input type="text" id="inside-list-topic-input" placeholder="Enter topic...">
-            <button type="button" id="add-topic-button">Save Topic</button>
-        </div>
-        <input type="search" id="item-search" placeholder="Search items..." aria-label="Search items">
-        <button type="button" id="item-search-button">Search</button>
-        <ul id="topic-list" class="topic-list"></ul>
-        <ul id="item-list" class="item-list"></ul>
-        <a href="index.html">Back to lists</a>
-    </main>
+    <div class="app-container">
+        <header class="app-header">
+            <h1 id="list-title"> {listName} </h1>
+            <a href="index.html" class="login-button">Back to lists</a>
+        </header>
+        <main>
+            <div class="create-box">
+                <button type="button" class="inside-list-show-item-input-button">Add Item</button>
+                <div id="item-editor" hidden>
+                    <input type="text" id="item-input" placeholder="Enter item...">
+                    <button type="button" id="add-item-button">Save Item</button>
+                </div>
+            </div>
+            <div class="create-box">
+                <button type="button" class="inside-list-show-topic-input-button">Add Topic</button>
+                <div id="topic-editor" hidden>
+                    <input type="text" id="inside-list-topic-input" placeholder="Enter topic...">
+                    <button type="button" id="add-topic-button">Save Topic</button>
+                </div>
+            </div>
+            <input type="search" id="item-search" placeholder="Search items..." aria-label="Search items">
+            <button type="button" id="item-search-button">Search</button>
+            <ul id="topic-list" class="topic-list"></ul>
+            <ul id="item-list" class="item-list"></ul>
+            <a href="index.html">Back to lists</a>
+        </main>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script>
     <script src="java/account.js"></script>
 </body>
