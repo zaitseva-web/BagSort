@@ -28,7 +28,8 @@ let activePointerId = null;
 // Функции для работы с localStorage
 function readArray(key) {
   try {
-    const value = JSON.parse(localStorage.getItem(key) || "[]");
+    const storageKey = `${window.flowStoragePrefix || ""}${key}`;
+    const value = JSON.parse(localStorage.getItem(storageKey) || "[]");
     return Array.isArray(value) ? value : [];
   } catch {
     return [];
@@ -38,7 +39,8 @@ function readArray(key) {
 // Сохраняет массив в localStorage
 function saveArray(key, values) {
   try {
-    localStorage.setItem(key, JSON.stringify(values));
+    const storageKey = `${window.flowStoragePrefix || ""}${key}`;
+    localStorage.setItem(storageKey, JSON.stringify(values));
   } catch {
     // Хранилище может быть недоступно.
   }

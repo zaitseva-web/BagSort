@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="style.css">
     <link rel='shortcut icon' href='images/favicone.svg' type='image/x-icon' />
 </head>
-<body class="index">
+<body class="index" data-load-app>
+    <a href="auth.html" class="login-button">Login</a>
     <h1 id="top">Lists for you</h1>
     <main>
         <p>Create list</p>
@@ -19,6 +20,7 @@
         
     </main>
     
-    <script src="java/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script>
+    <script src="java/account.js"></script>
 </body>
 </html>

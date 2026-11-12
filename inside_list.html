@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel='shortcut icon' href='images/favicone.svg' type='image/x-icon' />
 </head>
-<body class="inside-list-background">
+<body class="inside-list-background" data-load-app>
     <h1 id="list-title"> {listName} </h1>
     <main>
         <button type="button" class="inside-list-show-item-input-button">Add Item</button>
@@ -26,6 +26,7 @@
         <ul id="item-list" class="item-list"></ul>
         <a href="index.html">Back to lists</a>
     </main>
-    <script src="java/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script>
+    <script src="java/account.js"></script>
 </body>
 </html>
