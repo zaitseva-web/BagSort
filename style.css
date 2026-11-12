@@ -192,7 +192,173 @@ h1 {
     margin-top: 8px;
     background-color: #a32b2b;
 }
+:root {
+  --bg-gradient: radial-gradient(circle at 20% 20%, #1e1b4b 0%, #090d16 50%, #030712 100%);
+  --card-bg: rgba(17, 24, 39, 0.65);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --text: #f3f4f6;
+  --muted: #9ca3af;
+  --accent: #38bdf8;
+  --accent-hover: #0ea5e9;
+  --err: #f87171;
+  --ok: #4ade80;
+  --line: rgba(255, 255, 255, 0.1);
+}
 
+* {
+  box-sizing: border-box;
+}
+
+body.auth-page {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: var(--bg-gradient);
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  padding: 16px;
+}
+
+.card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--card-border);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.card h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin: 0 0 20px;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(16px);
+  padding: 4px;
+  border-radius: 24px;
+}
+
+.tabs button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: none;
+  color: var(--muted);
+  border-radius: 20px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s linear;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.tabs button.active {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.card label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 16px 0 6px;
+  color: #d1d5db;
+}
+
+.card input {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.6);
+  color: var(--text);
+  transition: all 0.2s ease;
+}
+
+.card input::placeholder {
+  color: #4b5563;
+}
+
+.card input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+}
+
+.submit {
+  width: 100%;
+  margin-top: 24px;
+  padding: 12px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.1s ease;
+}
+
+.submit:hover {
+  filter: brightness(1.1);
+}
+
+.submit:active {
+  transform: translateY(1px);
+}
+
+.submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+#msg {
+  min-height: 1.3em;
+  margin-top: 16px;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+#msg.err {
+  color: var(--err);
+}
+
+#msg.ok {
+  color: var(--ok);
+}
+
+.link {
+  background: none;
+  border: 0;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.875rem;
+  margin-top: 16px;
+  display: block;
+  margin-left: auto;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+[hidden] {
+  display: none !important;
+}
 
 /* Адаптация редактирования для телефонов */
 @media (max-width: 600px) {
