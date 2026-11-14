@@ -184,7 +184,7 @@ function createListCard(name, id) {
     isEditing = true;
     link.hidden = true;
     editButton.hidden = true;
-    listItem.append(title);
+    listItem.insertBefore(title, editButton);
 
     bindInlineRename({
       titleElement: title,
@@ -198,7 +198,7 @@ function createListCard(name, id) {
         }
       },
       onFinished: () => {
-        link.insertBefore(title, arrow);
+        link.append(title);
         link.hidden = false;
         editButton.hidden = false;
         isEditing = false;

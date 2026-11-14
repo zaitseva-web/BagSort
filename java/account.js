@@ -4,9 +4,22 @@
   const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   window.flowSupabaseClient = client;
+  const updateAccountLink = (session) => {
+    const loginButton = document.querySelector("body.index .login-button");
+    if (loginButton) {
+      loginButton.textContent = session ? "Account" : "Login";
+      loginButton.href = session ? "account.html" : "auth.html";
+    }
+  };
+
+  client.auth.onAuthStateChange((_event, session) => {
+    updateAccountLink(session);
+  });
+
   window.flowAccountReady = client.auth.getSession().then(({ data, error }) => {
     if (error) throw error;
 
+    updateAccountLink(data.session);
     const userId = data.session?.user.id;
     window.flowStoragePrefix = userId ? `flow:${userId}:` : "";
 

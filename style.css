@@ -64,7 +64,6 @@ body.index .login-button:hover {
   background: rgba(255, 255, 255, 0.15);
 }
 
-/* Блок создания списка */
 .create-box {
   background: rgba(17, 24, 39, 0.65);
   backdrop-filter: blur(16px);
@@ -122,7 +121,6 @@ body.index .login-button:hover {
   filter: brightness(1.1);
 }
 
-/* Секция со списками */
 .lists-section {
   width: 100%;
 }
@@ -162,6 +160,7 @@ ul.lists li a {
   text-decoration: none;
   font-weight: 500;
 }
+
 .inside-list-item-border {
     border: 6px solid #cab3b3;
     border-radius: 90px;
@@ -270,6 +269,7 @@ ul.lists li a {
     writing-mode: horizontal-tb;
     border-radius: 2rem;
 }
+
 .edit-button {
     cursor: pointer;
     border: none;
@@ -463,6 +463,8 @@ body.auth-page {
   cursor: pointer;
   transition: filter 0.2s ease, transform 0.1s ease;
 }
+
+
 
 .submit:hover {
   filter: brightness(1.1);

@@ -1,0 +1,33 @@
+.account-page{
+    background: repeating-linear-gradient(
+        -45deg,
+        #fff 0px,
+        #fff 10px,
+        #777777 10px,
+        #777777 20px
+    );
+}
+.account-page .card {
+  background: rgba(17, 24, 39, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-sizing: border-box;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0px 4px 30px rgba(0, 0, 0, 0.5);
+}
+.account-page .card h1 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #f3f4f6;
+}
+.logout-button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #ff4d4f;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
