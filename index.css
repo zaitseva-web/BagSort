@@ -172,6 +172,7 @@ ul.lists li a {
     color: black;
     min-width: 100px;
     max-width: 70%;
+    justify-content: start;
 }
 
 .edit-input:focus {
