@@ -389,10 +389,9 @@ if (contentContainer) {
       const originalName = nameElement.textContent.trim();
       const normalizedName = originalName.toLocaleLowerCase();
       const matchingTerms = searchTerms.filter((term) => normalizedName.includes(term));
-      item.hidden = searchTerms.length > 0 && matchingTerms.length === 0;
       renderItemSearchMatches(nameElement, originalName, matchingTerms);
 
-      if (!item.hidden && !firstMatch) {
+      if (matchingTerms.length > 0 && !firstMatch) {
         firstMatch = item;
       }
 
