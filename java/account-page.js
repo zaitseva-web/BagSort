@@ -1,7 +1,7 @@
 (() => {
   const client = window.flowSupabaseClient;
   const message = document.getElementById("msg");
-  const logout = document.getElementById("logout");
+  const logout = document.getElementById("logout-button");
 
   window.flowAccountReady
     .then(async () => {
