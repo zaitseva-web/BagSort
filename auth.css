@@ -1,0 +1,211 @@
+[hidden] {
+  display: none !important;
+}
+
+body.auth-page {
+  margin: 0;
+  min-height: 100vh;
+  box-sizing: border-box;
+  background: radial-gradient(circle at 20% 20%, #1e1b4b 0%, #090d16 50%, #030712 100%);
+  color: #f3f4f6;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.auth-page .card {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 400px;
+  padding: 28px 24px;
+  background: rgba(17, 24, 39, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+}
+
+.auth-page h1 {
+  margin: 0 0 20px;
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: #f3f4f6;
+}
+
+.auth-page p {
+  margin: 0 0 16px;
+  overflow-wrap: anywhere;
+}
+
+/* Переключатель «Sign In / Sign Up» */
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 20px;
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 12px;
+}
+
+.tabs button {
+  flex: 1;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #9ca3af;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.tabs button:hover {
+  color: #f3f4f6;
+}
+
+.tabs button.active {
+  background: linear-gradient(135deg, #3b86a8 0%, #254758 100%);
+  color: #ffffff;
+}
+
+/* Поля ввода */
+.auth-page label {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #9ca3af;
+}
+
+.auth-page input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  font-size: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.6);
+  color: #f3f4f6;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.auth-page input::placeholder {
+  color: #9ca3af;
+}
+
+.auth-page input:focus {
+  border-color: #719db1;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+}
+
+/* Основная кнопка */
+.submit {
+  display: block;
+  width: 100%;
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3b86a8 0%, #254758 100%);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s ease, opacity 0.2s ease;
+}
+
+.submit:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.submit:disabled,
+.link:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Кнопка-ссылка «Forgot Password?» */
+.link {
+  display: block;
+  margin: 14px auto 0;
+  padding: 4px 8px;
+  border: 0;
+  background: transparent;
+  color: #7dd3fc;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.link:hover:not(:disabled) {
+  color: #bae6fd;
+}
+
+/* Сообщения */
+#msg {
+  min-height: 1.2em;
+  margin-top: 16px;
+  font-size: 0.9rem;
+  color: #9ca3af;
+  overflow-wrap: anywhere;
+}
+
+#msg.err {
+  color: #f87171;
+}
+
+#msg.ok {
+  color: #4ade80;
+}
+
+/* Кнопка «Back to Home» */
+.back-button {
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 99px;
+  color: #f3f4f6;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Видимый фокус для работы с клавиатуры */
+button:focus-visible {
+  outline: 3px solid #7dd3fc;
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  body.auth-page {
+    padding: 24px 12px;
+  }
+
+  .auth-page .card {
+    padding: 22px 18px;
+  }
+
+  .auth-page h1 {
+    font-size: 1.5rem;
+  }
+
+  /* 16px, чтобы iOS не приближал страницу при вводе */
+  .auth-page input {
+    font-size: 16px;
+  }
+}
