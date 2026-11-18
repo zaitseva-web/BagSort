@@ -1,4 +1,8 @@
 /* Стили для главной страницы */
+[hidden] {
+  display: none !important;
+}
+
 body.index {
   margin: 0;
   min-height: 100vh;
@@ -25,6 +29,7 @@ body.index {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   width: 100%;
 }
 
@@ -35,7 +40,7 @@ body.index {
   letter-spacing: -0.025em;
 }
 
-/* Кнопка Login */
+/* Кнопка Login / Account */
 body.index .login-button {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -45,7 +50,8 @@ body.index .login-button {
   font-size: 0.9rem;
   font-weight: 500;
   text-decoration: none;
-  transition: all 0.2s ease;
+  white-space: nowrap;
+  transition: background 0.2s ease;
 }
 
 body.index .login-button:hover {
@@ -65,7 +71,8 @@ body.index .login-button:hover {
   width: 100%;
 }
 
-.create-box p, .lists-section > p {
+.create-box p,
+.lists-section > p {
   font-size: 0.95rem;
   font-weight: 600;
   color: #9ca3af;
@@ -80,6 +87,7 @@ body.index .login-button:hover {
 
 .create-box input {
   flex: 1;
+  min-width: 0;
   padding: 12px 14px;
   font-size: 0.95rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -87,7 +95,11 @@ body.index .login-button:hover {
   background: rgba(15, 23, 42, 0.6);
   color: #f3f4f6;
   outline: none;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.create-box input::placeholder {
+  color: #9ca3af;
 }
 
 .create-box input:focus {
@@ -99,8 +111,8 @@ body.index .login-button:hover {
   padding: 12px 20px;
   border: 0;
   border-radius: 12px;
-  background: linear-gradient(135deg, #4595b8 0%, #294f61 100%);
-  color: #0f172a;
+  background: linear-gradient(135deg, #3b86a8 0%, #254758 100%);
+  color: #ffffff;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
@@ -123,7 +135,6 @@ ul.lists {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  cursor: pointer;
 }
 
 ul.lists li {
@@ -134,16 +145,26 @@ ul.lists li {
   border-radius: 16px;
   padding: 16px 18px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  transition: all 0.2s ease;
+  gap: 4px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
   cursor: pointer;
 }
 
 ul.lists li:hover {
   border-color: rgba(56, 189, 248, 0.3);
   transform: translateY(-2px);
-  cursor: pointer;
+}
+
+/* Название списка занимает всё свободное место,
+   кнопки ✎ и × прижаты вправо рядом друг с другом */
+.list-card {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  writing-mode: horizontal-tb;
 }
 
 ul.lists li a {
@@ -151,51 +172,113 @@ ul.lists li a {
   text-decoration: none;
   font-weight: 500;
 }
+
+/* Название во время переименования: поле + ✓ + ✕ */
+ul.lists li > .list-card__title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Пустое состояние (нет ни одного списка) */
+ul.lists li.empty-state {
+  justify-content: center;
+  padding: 24px 18px;
+  border-style: dashed;
+  color: #9ca3af;
+  font-size: 0.95rem;
+  text-align: center;
+  cursor: default;
+}
+
+ul.lists li.empty-state:hover {
+  border-color: rgba(255, 255, 255, 0.08);
+  transform: none;
+}
+
+/* Кнопки ✎ и × (по умолчанию чёрные, на тёмном фоне не видны) */
 .edit-button {
-    cursor: pointer;
-    border: none;
-    background: transparent;
-    padding: 5px 8px;
-    font-size: 16px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  padding: 5px 8px;
+  font-size: 16px;
+  transition: color 0.2s ease, opacity 0.2s ease;
 }
 
 .edit-button:hover {
-    opacity: 0.6;
+  color: #f3f4f6;
 }
+
+.edit-button[aria-label="Delete list"] {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.edit-button[aria-label="Delete list"]:hover {
+  color: #f87171;
+}
+
 .edit-input {
-    font: inherit;
-    padding: 6px 10px;
-    border: 2px solid #d6b5c5;
-    border-radius: 8px;
-    outline: none;
-    background: white;
-    color: black;
-    min-width: 100px;
-    max-width: 70%;
-    justify-content: start;
+  font: inherit;
+  padding: 6px 10px;
+  border: 2px solid #d6b5c5;
+  border-radius: 8px;
+  outline: none;
+  background: white;
+  color: black;
+  min-width: 100px;
+  max-width: 70%;
 }
 
 .edit-input:focus {
-    border-color: #557fbd;
+  border-color: #557fbd;
 }
+
 .save-button,
 .cancel-button {
-    cursor: pointer;
-    border: none;
-    background: transparent;
-    font-size: 18px;
-    margin-left: 5px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  margin-left: 5px;
 }
 
 .save-button {
-    color: #176b32;
+  color: #4ade80;
 }
 
 .cancel-button {
-    color: #c0392b;
+  color: #f87171;
+}
+
+/* Видимый фокус для работы с клавиатуры */
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid #7dd3fc;
+  outline-offset: 2px;
 }
 
 @media (max-width: 600px) {
+  body.index {
+    padding: 24px 12px;
+  }
+
+  .app-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .create-box {
+    padding: 18px;
+  }
+
+  ul.lists li {
+    padding: 14px;
+  }
+
   .edit-input {
     flex: 1;
     min-width: 0;
@@ -216,13 +299,4 @@ ul.lists li a {
     padding: 8px;
     font-size: 20px;
   }
-}
-.list-card {
-    display: block;
-    
-    margin: 0;
-    inline-size: fit-content;
-    max-inline-size: 100%;
-    writing-mode: horizontal-tb;
-    border-radius: 2rem;
 }

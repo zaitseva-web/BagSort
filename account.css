@@ -1,26 +1,124 @@
-body.account-page{
+[hidden] {
+  display: none !important;
+}
+
+body.account-page {
   background: radial-gradient(circle at 20% 20%, #1e1b4b 0%, #090d16 50%, #030712 100%);
   margin: 0;
   min-height: 100vh;
   color: #f3f4f6;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   padding: 40px 20px;
+  box-sizing: border-box;
+  /* Шапка и карточка идут друг под другом, по центру */
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+/* Шапка со ссылкой «назад» */
+.account-page .app-header {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.back-button {
+  display: inline-block;
+  padding: 8px 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 99px;
+  color: #f3f4f6;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Карточка аккаунта */
+.account-page .card {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 440px;
+  padding: 28px 24px;
+  background: rgba(17, 24, 39, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
 }
 
 .account-page .card h1 {
   font-size: 2rem;
-  margin-bottom: 20px;
+  margin: 0 0 20px;
   color: #f3f4f6;
 }
+
+.account-page .card p {
+  margin: 0 0 16px;
+  overflow-wrap: anywhere;
+}
+
 .logout-button {
   display: inline-block;
   padding: 10px 20px;
-  background-color: #ff4d4f;
+  background-color: #dc2626;
   color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, opacity 0.2s ease;
+}
+
+.logout-button:hover {
+  background-color: #b91c1c;
+}
+
+.logout-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Сообщения (ошибки выхода и загрузки) */
+#msg {
+  min-height: 1.2em;
+  margin: 16px 0 0;
+  font-size: 0.9rem;
+  color: #9ca3af;
+}
+
+#msg[role="alert"] {
+  color: #f87171;
+}
+
+/* Видимый фокус для работы с клавиатуры */
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid #7dd3fc;
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  body.account-page {
+    padding: 24px 12px;
+  }
+
+  .account-page .card {
+    padding: 22px 18px;
+  }
+
+  .account-page .card h1 {
+    font-size: 1.6rem;
+  }
 }

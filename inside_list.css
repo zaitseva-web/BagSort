@@ -2,16 +2,16 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 h1 {
   margin-inline: 40px;
   font-family: "Bookman Old Style", serif;
-  justify-content: start;
 }
 
-.inside-list-title {
-  margin-inline: 0;
-  justify-content: start;
-}
+/* ---------- Страница и шапка ---------- */
 
 .inside-list-background {
   background: #91c891;
@@ -20,16 +20,15 @@ h1 {
   display: flex;
   justify-content: flex-start;
   padding: 6px;
+  color: #111827;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
-
 
 .app-container {
   width: 100%;
-  max-width: none;
   display: flex;
   flex-direction: column;
   gap: 24px;
-  justify-content: flex-start;
 }
 
 .app-header {
@@ -47,7 +46,30 @@ h1 {
   font-weight: 700;
   margin: 0;
   letter-spacing: -0.025em;
+  overflow-wrap: anywhere;
 }
+
+/* Ссылка «Back to lists» (в этой странице index.css не подключён) */
+.login-button {
+  grid-column: 2;
+  grid-row: 1;
+  padding: 8px 18px;
+  border-radius: 99px;
+  border: 1px solid rgba(17, 24, 39, 0.25);
+  background: rgba(255, 255, 255, 0.45);
+  color: #111827;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.2s ease;
+}
+
+.login-button:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+/* ---------- Панель управления ---------- */
 
 .inside-list-controls {
   display: flex;
@@ -60,12 +82,13 @@ h1 {
   grid-row: 2;
 }
 
-.inside-list-controls .create-box {
+.create-box {
   display: flex;
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 0;
+  padding: 2px;
+  border-radius: 20px;
 }
 
 .inside-list-controls [id$="-editor"]:not([hidden]) {
@@ -81,23 +104,6 @@ h1 {
   width: 100%;
 }
 
-.inside-list-main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-
-.inside-list-main .topic-list,
-.inside-list-main .item-list {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  max-width: 640px;
-  margin-inline: auto;
-}
-
 .inside-list-search {
   display: flex;
   align-items: center;
@@ -105,21 +111,32 @@ h1 {
   width: 100%;
 }
 
+.create-box input,
 #item-search {
   flex: 1;
   min-width: 0;
-  width: 100%;
   padding: 12px 14px;
   font-size: 0.95rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(15, 23, 42, 0.85);
   color: #f3f4f6;
   outline: none;
-  transition: all 0.2s ease;
-  
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.create-box input::placeholder,
+#item-search::placeholder {
+  color: #9ca3af;
+}
+
+.create-box input:focus,
+#item-search:focus {
+  border-color: #719db1;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+}
+
+/* Общий вид кнопок управления */
 #add-item-button,
 #add-topic-button,
 #item-search-button,
@@ -133,17 +150,16 @@ h1 {
   padding: 0 12px;
   border: 0;
   border-radius: 12px;
-  background: linear-gradient(135deg, #4595b8 0%, #294f61 100%);
-  color: #0f172a;
+  background: linear-gradient(135deg, #3b86a8 0%, #254758 100%);
+  color: #ffffff;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   transition: filter 0.2s ease;
 }
 
-.login-button {
-  grid-column: 2;
-  grid-row: 1;
+.inside-list-show-item-input-button {
+  background: #a32b2b;
 }
 
 #item-search-button:hover,
@@ -151,88 +167,62 @@ h1 {
   filter: brightness(1.1);
 }
 
-.create-box {
-  border-radius: 20px;
-  padding: 2px;
+/* ---------- Список: топики и элементы ---------- */
+
+.inside-list-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
 }
 
-.create-box p,
-.lists-section > p {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #9ca3af;
-  margin: 0 0 12px 0;
+.topic-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0;
 }
 
-.create-box input {
-  flex: 1;
-  padding: 12px 14px;
-  font-size: 0.95rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  background: rgba(15, 23, 42, 0.6);
-  color: #f3f4f6;
-  outline: none;
-  transition: all 0.2s ease;
+.item,
+.topic {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
 }
 
-.create-box input:focus {
-  border-color: #719db1;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
-}
-
-.create-box button {
-  padding: 12px 20px;
-  border: 0;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #4595b8 0%, #294f61 100%);
-  color: #0f172a;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: filter 0.2s ease;
-}
-
-.create-box button:hover {
-  filter: brightness(1.1);
+.item {
+  justify-content: space-between;
+  transition: opacity 0.2s, box-shadow 0.2s, transform 0.2s;
 }
 
 .inside-list-item-border {
   border: 6px solid #cab3b3;
-  border-radius: 90px;
-  padding: 1rem;
+  border-radius: 40px;
+  padding: 1rem 1.25rem;
   margin-inline: auto;
   width: 100%;
   max-width: 540px;
-  box-sizing: border-box;
 }
 
-.item-list {
-  list-style: none;
-  padding: 0;
-  margin: 0 auto;
-  width: 100%;
+.topic {
+  width: fit-content;
+  padding: 0.1rem;
+  margin: 0.5rem auto;
+  text-align: center;
+  user-select: none;
 }
 
-.item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  transition: opacity 0.2s, box-shadow 0.2s, transform 0.2s;
-}
-
-.item.dragging {
-  opacity: 0.5;
-  background-color: #99c3c9;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-  transform: scale(1.02);
-}
-
-.item__name {
-  overflow-wrap: anywhere;
+.item__name,
+.topic__name {
   flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .item__name mark {
@@ -240,6 +230,18 @@ h1 {
   color: inherit;
 }
 
+.item.dragging,
+.topic.dragging {
+  opacity: 0.5;
+}
+
+.item.dragging {
+  background-color: #99c3c9;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  transform: scale(1.02);
+}
+
+/* Ручка перетаскивания: только она блокирует скролл пальцем */
 .drag-handle {
   flex: 0 0 auto;
   display: inline-flex;
@@ -255,67 +257,57 @@ h1 {
   cursor: grabbing;
 }
 
-.item-delete-button {
-  flex: 0 0 auto;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: #8b2f2f;
-  font: inherit;
-  font-size: 1.5rem;
-  line-height: 1;
-  cursor: pointer;
-}
+/* ---------- Кнопки редактирования и удаления ---------- */
 
-.topic {
-  display: block;
-  width: fit-content;
-  max-width: 100%;
-  padding: 0.1rem;
-  margin: 0.5rem auto;
-  box-sizing: border-box;
-  text-align: center;
-  cursor: grab;
-  touch-action: none;
-  user-select: none;
-}
-
-.topic-list {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 0;
-  list-style: none;
-  width: 100%;
-}
-
-.topic.dragging {
-  cursor: grabbing;
-  opacity: 0.5;
-}
-
-.inside-list-topic-border {
-  padding: 0.5rem;
-  margin: 2rem auto;
-  border: 3px;
-  width: 35%;
-  box-sizing: border-box;
-}
-
-.edit-button {
+.edit-button,
+.save-button,
+.cancel-button {
   cursor: pointer;
   border: none;
   background: transparent;
+}
+
+.edit-button {
   padding: 5px 8px;
   font-size: 16px;
 }
 
 .edit-button:hover {
   opacity: 0.6;
+}
+
+.save-button,
+.cancel-button {
+  font-size: 18px;
+  margin-left: 5px;
+}
+
+.save-button {
+  color: #0f4d23;
+}
+
+.cancel-button {
+  color: #8e1f14;
+}
+
+.item-delete-button,
+.topic-delete-button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #6e1f1f;
+  font: inherit;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.item-delete-button {
+  flex: 0 0 auto;
+}
+
+.topic-delete-button {
+  flex: 0 0 30px;
 }
 
 .edit-input {
@@ -334,69 +326,32 @@ h1 {
   border-color: #557fbd;
 }
 
-.save-button,
-.cancel-button {
-  cursor: pointer;
-  border: none;
-  background: transparent;
-  font-size: 18px;
-  margin-left: 5px;
+/* Видимый фокус для работы с клавиатуры */
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid #1d4ed8;
+  outline-offset: 2px;
 }
 
-.save-button {
-  color: #176b32;
-}
-
-.cancel-button {
-  color: #c0392b;
-}
-
-.topic-delete-button {
-  flex: 0 0 30px;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: #8b2f2f;
-  font: inherit;
-  font-size: 1.5rem;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.inside-list-show-item-input-button {
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-  background-color: #a32b2b;
-}
-
-[hidden] {
-  display: none !important;
-}
+/* ---------- Мобильная версия ---------- */
 
 @media (max-width: 600px) {
+  .app-header h1 {
+    font-size: 1.5rem;
+  }
+
   .inside-list-controls {
-    align-items: stretch;
+    max-width: none;
   }
 
-  .inside-list-controls .create-box,
-  .inside-list-search {
-    width: 100%;
-  }
-
-  .inside-list-controls .create-box {
+  .create-box {
     justify-content: space-between;
   }
 
-  .inside-list-search #item-search {
-    flex: 1;
-    width: auto;
-  }
-
-  .item,
-  .topic {
-    max-width: 100%;
-    box-sizing: border-box;
+  .inside-list-item-border {
+    border-width: 4px;
+    border-radius: 28px;
+    padding: 0.75rem 1rem;
   }
 
   .edit-input {
@@ -404,7 +359,6 @@ h1 {
     min-width: 0;
     width: 100%;
     max-width: 100%;
-    box-sizing: border-box;
     font-size: 16px;
   }
 
@@ -424,18 +378,4 @@ h1 {
     padding: 8px;
     font-size: 20px;
   }
-}
-
-.item,
-.topic {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.item__name,
-.topic__name {
-  flex: 1;
-  min-width: 0;
-  overflow-wrap: anywhere;
 }

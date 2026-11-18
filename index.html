@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Vortex: create and organize your lists.">
     <title>Vortex</title>
     <link rel="stylesheet" href="index.css">
-    <link rel='shortcut icon' href='images/favicone.svg' type='image/x-icon' />
+    <link rel="shortcut icon" href="images/favicone.svg" type="image/x-icon">
 </head>
 <body class="index" data-load-app>
     <div class="app-container">
-        
 
         <!-- Шапка -->
         <header class="app-header">
@@ -18,22 +18,26 @@
         </header>
 
         <!-- Блок создания списка -->
-        <div class="create-box">
+        <section class="create-box">
             <p>Create list</p>
             <div class="create-form">
-                <input type="text" id="list_name" placeholder="Enter list name...">
+                <input type="text" id="list_name" placeholder="Enter list name..." aria-label="List name" autocomplete="off">
                 <button type="button" id="create-list-button">Create</button>
             </div>
-        </div>
+        </section>
 
         <!-- Секция со списками -->
-        <div class="lists-section">
+        <section class="lists-section">
             <p>Choose:</p>
             <ul id="lists" class="lists"></ul>
-        </div>
+        </section>
+
+        <noscript>
+            <p>This app needs JavaScript to work. Please enable it in your browser.</p>
+        </noscript>
 
     </div>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script>
     <script src="java/account.js"></script>
 </body>

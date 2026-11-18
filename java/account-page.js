@@ -3,6 +3,17 @@
   const message = document.getElementById("msg");
   const logout = document.getElementById("logout-button");
 
+  const showError = (text) => {
+    message.textContent = text;
+    message.setAttribute("role", "alert");
+  };
+
+  if (!client) {
+    showError("Could not connect to the account service. Please reload the page.");
+    logout.disabled = true;
+    return;
+  }
+
   window.flowAccountReady
     .then(async () => {
       const { data, error } = await client.auth.getSession();
@@ -15,8 +26,7 @@
     })
     .catch((error) => {
       console.error("Could not load account:", error);
-      message.textContent = "Could not load your account. Please reload the page.";
-      message.setAttribute("role", "alert");
+      showError("Could not load your account. Please reload the page.");
     });
 
   client.auth.onAuthStateChange((event, session) => {
@@ -32,8 +42,7 @@
       if (error) throw error;
     } catch (error) {
       console.error("Could not sign out:", error);
-      message.textContent = error instanceof Error ? error.message : "Could not sign out.";
-      message.setAttribute("role", "alert");
+      showError(error instanceof Error ? error.message : "Could not sign out.");
       logout.disabled = false;
     }
   });

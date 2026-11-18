@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sign In and Sign Up</title>
 <link rel="stylesheet" href="style.css">
-<link rel='shortcut icon' href='images/favicone.svg' type='image/x-icon' />
-
+<link rel="shortcut icon" href="images/favicone.svg" type="image/x-icon">
 </head>
 <body class="auth-page">
 <div class="card">
@@ -22,101 +21,32 @@
     <input id="email" type="email" autocomplete="email" placeholder="you@mail.com">
     <label for="password">Password (minimum 8 characters)</label>
     <input id="password" type="password" autocomplete="current-password">
-    <button class="submit" id="submit">Sign In</button>
+    <button class="submit" id="submit" type="button">Sign In</button>
     <button class="link" id="forgot" type="button">Forgot Password?</button>
+  </div>
+
+  <!-- Показывается после перехода по ссылке из письма «сброс пароля» -->
+  <div id="recovery" hidden>
+    <h1>Set a new password</h1>
+    <label for="new-password">New password (minimum 8 characters)</label>
+    <input id="new-password" type="password" autocomplete="new-password">
+    <button class="submit" id="save-password" type="button">Save password</button>
   </div>
 
   <!-- Показывается после входа -->
   <div id="user" hidden>
     <h1>You are logged in</h1>
     <p>Email: <b id="user-email"></b></p>
-    <button class="submit" id="logout">Logout</button>
+    <button class="submit" id="logout" type="button">Logout</button>
   </div>
 
-  <div id="msg" role="status"></div>
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <button class="back-button" id="back-home" type="button">Back to Home</button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script>
 <script src="java/account.js"></script>
-<script>
-  const sb = window.flowSupabaseClient;
-
-  const $ = id => document.getElementById(id);
-  const returnUrl = new URL('index.html', window.location.href).href;
-  let mode = 'login';
-
-  function say(text, type) { $('msg').textContent = text; $('msg').className = type || ''; }
-
-  function setMode(m) {
-    mode = m;
-    $('tab-login').classList.toggle('active', m === 'login');
-    $('tab-signup').classList.toggle('active', m === 'signup');
-    $('submit').textContent = m === 'login' ? 'Sign In' : 'Sign Up';
-    $('password').autocomplete = m === 'login' ? 'current-password' : 'new-password';
-    say('');
-  }
-  $('tab-login').onclick = () => setMode('login');
-  $('tab-signup').onclick = () => setMode('signup');
-
-  $('submit').onclick = async () => {
-    const email = $('email').value.trim();
-    const password = $('password').value;
-    if (!email || password.length < 8) return say('Please enter your email and a password with at least 8 characters', 'err');
-
-    $('submit').disabled = true;
-    say('Waiting…');
-
-    try {
-      const { data, error } = mode === 'signup'
-        ? await sb.auth.signUp({
-            email,
-            password,
-            options: { emailRedirectTo: returnUrl }
-          })
-        : await sb.auth.signInWithPassword({ email, password });
-
-      if (error) return say(error.message, 'err');
-      if (mode === 'signup') {
-        if (data.session) {
-          window.location.replace(returnUrl);
-        } else {
-          say('Registration successful. Check your email and confirm your address to continue.', 'ok');
-        }
-      } else {
-        window.location.replace(returnUrl);
-      }
-    } catch (error) {
-      say(error instanceof Error ? error.message : 'Registration failed. Please try again.', 'err');
-    } finally {
-      $('submit').disabled = false;
-    }
-  };
-
-  $('forgot').onclick = async () => {
-    const email = $('email').value.trim();
-    if (!email) return say('Please enter your email above', 'err');
-    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.href });
-    say(error ? error.message : 'email to reset password sent', error ? 'err' : 'ok');
-  };
-
-  $('logout').onclick = () => sb.auth.signOut();
-
-  // Следим за состоянием входа (работает и после перезагрузки страницы)
-  function render(session) {
-    $('guest').hidden = !!session;
-    $('user').hidden = !session;
-    if (session) { $('user-email').textContent = session.user.email; say(''); }
-  }
-  sb.auth.getSession().then(({ data }) => render(data.session));
-  sb.auth.onAuthStateChange((event, session) => {
-    render(session);
-    const isAuthCallback = location.hash.includes('access_token=') ||
-      new URLSearchParams(location.search).has('code');
-    if (event === 'SIGNED_IN' && session && isAuthCallback) {
-      window.location.replace(returnUrl);
-    }
-  });
-</script>
-<button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>
+<script src="java/auth.js"></script>
 </body>
 </html>

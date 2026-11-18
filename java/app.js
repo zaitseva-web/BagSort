@@ -7,7 +7,6 @@ const addTopicButton = document.getElementById("add-topic-button");
 const topicList = document.getElementById("topic-list");
 const showTopicInputButton = document.querySelector(".inside-list-show-topic-input-button");
 const topicEditor = document.getElementById("topic-editor");
-const itemList = topicList || document.getElementById("item-list");
 
 const itemInput = document.getElementById("item-input");
 const addItemButton = document.getElementById("add-item-button");
@@ -19,11 +18,6 @@ const listTitle = document.getElementById("list-title");
 
 // Ключи для хранения данных в localStorage
 const listStorageKey = "lists";
-const contentStorageKey = "content";
-let savedItems = [];
-let itemStorageKey = "";
-let draggedItem = null;
-let activePointerId = null;
 
 // Функции для работы с localStorage
 function readArray(key) {
@@ -55,6 +49,27 @@ function createId() {
     Math.random().toString(36).slice(2);
 }
 
+// Переносит контент старого списка (по имени) на новый ID
+function migrateLegacyContent(list) {
+  const key = `content:${list.id}`;
+  if (readArray(key).length > 0) return;
+
+  let content = readArray(`content:${list.name}`);
+
+  if (content.length === 0) {
+    const toEntries = (type) => (name) => ({ type, name });
+    const topics = readArray(`topics:${list.name}`)
+      .filter((name) => typeof name === "string")
+      .map(toEntries("topic"));
+    const items = readArray(`items:${list.name}`)
+      .filter((name) => typeof name === "string")
+      .map(toEntries("item"));
+    content = [...topics, ...items];
+  }
+
+  if (content.length > 0) saveArray(key, content);
+}
+
 // Получает списки и переносит старый формат в новый
 function getLists() {
   const oldLists = readArray(listStorageKey);
@@ -72,10 +87,9 @@ function getLists() {
 
     // Если раньше список был просто строкой,
     // создаём для него ID
-    return {
-      id: createId(),
-      name: String(list)
-    };
+    const migrated = { id: createId(), name: String(list) };
+    migrateLegacyContent(migrated);
+    return migrated;
   });
 
   // Сохраняем новый формат
@@ -164,16 +178,35 @@ function createListCard(name, id) {
   title.className = "list-card__title";
   title.textContent = name;
 
-  const arrow = document.createElement("span");
-  arrow.className = "list-card__arrow";
-  arrow.textContent = "→";
-
   link.append(title);
 
   const editButton = document.createElement("button");
   editButton.type = "button";
   editButton.textContent = "✎";
+  editButton.setAttribute("aria-label", "Edit");
   editButton.className = "edit-button";
+
+  const deleteButton = document.createElement("button");
+  deleteButton.type = "button";
+  deleteButton.className = "edit-button";
+  deleteButton.setAttribute("aria-label", "Delete list");
+  deleteButton.textContent = "×";
+
+  deleteButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!window.confirm(`Delete list "${title.textContent}" and everything in it?`)) return;
+
+    saveArray(listStorageKey, getLists().filter((list) => list.id !== id));
+    try {
+      localStorage.removeItem(`${window.flowStoragePrefix || ""}content:${id}`);
+    } catch {
+      // Хранилище может быть недоступно.
+    }
+    listItem.remove();
+    updateEmptyState();
+  });
 
   editButton.addEventListener("click", (event) => {
     event.preventDefault();
@@ -184,6 +217,7 @@ function createListCard(name, id) {
     isEditing = true;
     link.hidden = true;
     editButton.hidden = true;
+    deleteButton.hidden = true;
     listItem.insertBefore(title, editButton);
 
     bindInlineRename({
@@ -201,6 +235,7 @@ function createListCard(name, id) {
         link.append(title);
         link.hidden = false;
         editButton.hidden = false;
+        deleteButton.hidden = false;
         isEditing = false;
       }
     });
@@ -220,19 +255,34 @@ function createListCard(name, id) {
     window.location.href = link.href;
   });
 
-  listItem.append(link, editButton);
+  listItem.append(link, editButton, deleteButton);
 
   return listItem;
 }
 // Загружает сохраненные списки и отображает их на странице
-if (listsContainer) {
-  const lists = getLists();
+function updateEmptyState() {
+  if (!listsContainer) return;
 
-  lists.forEach((list) => {
+  const empty = listsContainer.querySelector(".empty-state");
+  const hasLists = listsContainer.querySelector("li:not(.empty-state)");
+
+  if (hasLists && empty) empty.remove();
+
+  if (!hasLists && !empty) {
+    const emptyItem = document.createElement("li");
+    emptyItem.className = "empty-state";
+    emptyItem.textContent = "No lists yet. Create your first one above.";
+    listsContainer.append(emptyItem);
+  }
+}
+
+if (listsContainer) {
+  getLists().forEach((list) => {
     listsContainer.append(
       createListCard(list.name, list.id)
     );
   });
+  updateEmptyState();
 }
 // Обработчик события для кнопки создания нового списка
 if (listsContainer && createListButton && listNameInput) {
@@ -261,8 +311,16 @@ if (listsContainer && createListButton && listNameInput) {
       createListCard(newList.name, newList.id)
     );
 
+    updateEmptyState();
     listNameInput.value = "";
     listNameInput.focus();
+  });
+
+  listNameInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      createListButton.click();
+    }
   });
 }
 
@@ -280,6 +338,7 @@ function createTopic(name) {
   editButton.type = "button";
   editButton.className = "edit-button";
   editButton.textContent = "✎";
+  editButton.setAttribute("aria-label", "Edit");
 
   const deleteButton = document.createElement("button");
   deleteButton.type = "button";
@@ -309,6 +368,7 @@ function createItem(name) {
   editButton.type = "button";
   editButton.className = "edit-button";
   editButton.textContent = "✎";
+  editButton.setAttribute("aria-label", "Edit");
 
   // Ручка для перетаскивания
   const handle = document.createElement("span");
@@ -340,15 +400,17 @@ if (showTopicInputButton && topicEditor) {
 }
 
 //  для отображения и скрытия добавления элементов
-if (contentContainer) {
-  const listId = getCurrentListId();
+const pageListId = contentContainer ? getCurrentListId() : null;
+const listNotFound =
+  Boolean(contentContainer) && !getLists().some((list) => list.id === pageListId);
 
-  const lists = getLists();
+if (listNotFound) {
+  window.location.replace("index.html");
+}
 
-  const currentList = lists.find(
-    (list) => list.id === listId
-  );
-
+if (contentContainer && !listNotFound) {
+  const listId = pageListId;
+  const currentList = getLists().find((list) => list.id === listId);
   const listName = currentList?.name || "List";
 
   const contentStorageKey = `content:${listId}`;
@@ -572,38 +634,7 @@ if (contentContainer) {
     }
   }
 // Загружаем сохраненный контент из localStorage и фильтруем его
- let savedContent = readArray(contentStorageKey);
-
-// Если нового хранилища ещё нет,
-// пробуем найти старое по названию
-if (savedContent.length === 0 && listName !== "Список") {
-  savedContent = readArray(`content:${listName}`);
-
-  // Если старого общего хранилища нет,
-  // пробуем отдельные хранилища топиков и элементов
-  if (savedContent.length === 0) {
-    const oldTopics = topicList
-      ? readArray(`topics:${listName}`)
-          .filter((name) => typeof name === "string")
-          .map((name) => ({
-            type: "topic",
-            name: name
-          }))
-      : [];
-
-    const oldItems = readArray(`items:${listName}`)
-      .filter((name) => typeof name === "string")
-      .map((name) => ({
-        type: "item",
-        name: name
-      }));
-
-    savedContent = [...oldTopics, ...oldItems];
-  }
-
-  // Сохраняем перенесённые данные по новому ID
-  saveArray(contentStorageKey, savedContent);
-}
+  let savedContent = readArray(contentStorageKey);
 
 savedContent = savedContent.filter(
   (entry) =>
@@ -618,7 +649,13 @@ savedContent = savedContent.filter(
   if (listTitle) {
     listTitle.textContent = listName;
     listTitle.style.cursor = "pointer";
-    listTitle.addEventListener("click", () => {
+    listTitle.addEventListener("click", (event) => {
+      if (
+        event.target instanceof Element &&
+        event.target.closest(".edit-input, .save-button, .cancel-button")
+      ) {
+        return;
+      }
       if (listTitle.querySelector(".edit-input")) return;
 
       bindInlineRename({
@@ -693,7 +730,25 @@ savedContent = savedContent.filter(
       }
     });
   }
-// Обработчики событий для перетаскивания топиков и элементов
+// Enter в полях ввода и живой поиск
+  [[topicInput, addTopicButton], [itemInput, addItemButton]].forEach(([input, button]) => {
+    input?.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        button?.click();
+      }
+    });
+  });
+
+  itemSearchInput?.addEventListener("input", () => filterItems());
+  itemSearchInput?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      filterItems(true);
+    }
+  });
+
+  // Обработчики событий для перетаскивания топиков и элементов
   contentContainer.addEventListener("pointerdown", (event) => {
     if (!event.isPrimary || (event.pointerType === "mouse" && event.button !== 0)) {
       return;
@@ -730,13 +785,6 @@ savedContent = savedContent.filter(
 
     const afterElement = others.find((element) => {
       const bounds = element.getBoundingClientRect();
-      const isSameRow =
-        event.clientY >= bounds.top && event.clientY <= bounds.bottom;
-
-      if (isSameRow) {
-         return event.clientX < bounds.left + bounds.width / 2;
-      }
-
       return event.clientY < bounds.top + bounds.height / 2;
     });
 
