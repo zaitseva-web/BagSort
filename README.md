@@ -20,10 +20,15 @@ ________________________________________________________________________________
 🗂️ Project layout
 .
 ├── index.html          # Home: all your lists
+
 ├── inside_list.html    # One list: topics, items, search
+
 ├── auth.html           # Sign in / sign up / forgot + set new password
+
 ├── account.html        # Your account page
+
 ├── index.css
+
 ├── inside_list.css
 ├── auth.css
 ├── account.css
