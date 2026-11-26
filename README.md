@@ -18,6 +18,7 @@ Pure HTML, CSS and vanilla JavaScript. No build step, no node_modules black hole
 
 _________________________________________________________________________________________________________
 🗂️ Project layout
+
 .
 ├── index.html          # Home: all your lists
 
@@ -30,10 +31,14 @@ ________________________________________________________________________________
 ├── index.css
 
 ├── inside_list.css
+
 ├── auth.css
+
 ├── account.css
+
 ├── images/
 │   └── favicone.svg
+
 └── java/
     ├── account.js      # Supabase client + session + storage prefix + loads app.js
     ├── app.js          # The brains: lists, topics, items, drag & drop, search
