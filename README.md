@@ -29,7 +29,7 @@ Pure HTML, CSS and vanilla JavaScript. No build step, no node_modules black hole
 _________________________________________________________________________________________________________
 🗂️ Project layout
 
-.
+
 ├── index.html          # Home: all your lists
 
 ├── inside_list.html    # One list: topics, items, search
@@ -47,6 +47,7 @@ ________________________________________________________________________________
 ├── account.css
 
 ├── images/
+
 │   └── favicone.svg
 
 └── java/
