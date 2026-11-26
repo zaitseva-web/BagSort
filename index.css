@@ -1,4 +1,4 @@
-/* Стили для главной страницы */
+/* стили  */
 [hidden] {
   display: none !important;
 }
@@ -24,7 +24,7 @@ body.index {
   gap: 24px;
 }
 
-/* Шапка: заголовок слева, кнопка справа */
+/*шапка */
 .app-header {
   display: flex;
   justify-content: space-between;

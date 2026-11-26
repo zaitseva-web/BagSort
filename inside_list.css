@@ -9,12 +9,13 @@
 h1 {
   margin-inline: 40px;
   font-family: "Bookman Old Style", serif;
+  color: #eaf1f2
 }
 
-/* ---------- Страница и шапка ---------- */
+/* шапка*/
 
 .inside-list-background {
-  background: #91c891;
+  background: content-box radial-gradient( #1e1b4b , #090d16  );;
   min-height: 100vh;
   margin: 0;
   display: flex;
@@ -49,7 +50,7 @@ h1 {
   overflow-wrap: anywhere;
 }
 
-/* Ссылка «Back to lists» (в этой странице index.css не подключён) */
+/* ссылка */
 .login-button {
   grid-column: 2;
   grid-row: 1;
@@ -69,7 +70,7 @@ h1 {
   background: rgba(255, 255, 255, 0.7);
 }
 
-/* ---------- Панель управления ---------- */
+/*панель*/
 
 .inside-list-controls {
   display: flex;
@@ -136,7 +137,7 @@ h1 {
   box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
 }
 
-/* Общий вид кнопок управления */
+/* общий вид кнопок  */
 #add-item-button,
 #add-topic-button,
 #item-search-button,
@@ -158,16 +159,14 @@ h1 {
   transition: filter 0.2s ease;
 }
 
-.inside-list-show-item-input-button {
-  background: #a32b2b;
-}
+
 
 #item-search-button:hover,
 .inside-list-controls button:hover {
   filter: brightness(1.1);
 }
 
-/* ---------- Список: топики и элементы ---------- */
+/* список*/
 
 .inside-list-main {
   display: flex;
@@ -204,10 +203,12 @@ h1 {
 .inside-list-item-border {
   border: 6px solid #cab3b3;
   border-radius: 40px;
+  background-color: #1e1b4b;
   padding: 1rem 1.25rem;
   margin-inline: auto;
   width: 100%;
   max-width: 540px;
+  color:#f3f4f6;
 }
 
 .topic {
@@ -216,6 +217,7 @@ h1 {
   margin: 0.5rem auto;
   text-align: center;
   user-select: none;
+  color:#f3f4f6;
 }
 
 .item__name,
@@ -241,13 +243,13 @@ h1 {
   transform: scale(1.02);
 }
 
-/* Ручка перетаскивания: только она блокирует скролл пальцем */
+/* ручка */
 .drag-handle {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #000000;
+  color: #8a8888;
   cursor: grab;
   touch-action: none;
   user-select: none;
@@ -257,7 +259,7 @@ h1 {
   cursor: grabbing;
 }
 
-/* ---------- Кнопки редактирования и удаления ---------- */
+/*кнопки */
 
 .edit-button,
 .save-button,
@@ -270,6 +272,7 @@ h1 {
 .edit-button {
   padding: 5px 8px;
   font-size: 16px;
+  color:burlywood;
 }
 
 .edit-button:hover {
@@ -326,14 +329,14 @@ h1 {
   border-color: #557fbd;
 }
 
-/* Видимый фокус для работы с клавиатуры */
+
 button:focus-visible,
 a:focus-visible {
   outline: 3px solid #1d4ed8;
   outline-offset: 2px;
 }
 
-/* ---------- Мобильная версия ---------- */
+/*моб */
 
 @media (max-width: 600px) {
   .app-header h1 {
