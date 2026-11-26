@@ -9,13 +9,21 @@ Vortex is a tiny, no-framework list app. Make lists, fill them with topics and i
 Pure HTML, CSS and vanilla JavaScript. No build step, no node_modules black hole, no 400 MB of dependencies to list your groceries.
 
 ✨ What it does
+
 📝 Create, rename and delete lists (with a "are you sure?" so you don't nuke your life by accident)
+
 🧩 Topics and items inside every list
+
 🖱️ Drag & drop reordering by the ☰ handle. Mouse and touch both work
+
 🔍 Live search that highlights matches as you type
+
 ✏️ Inline editing: click the title or hit ✎, then Enter to save or Esc to bail
+
 🔐 Accounts via Supabase: sign up, sign in, reset your password, log out dramatically
+
 🕶️ Guest mode: no account needed, and your guest lists move into your account the first time you log in
+
 📱 Mobile friendly, dark gradient vibes included
 
 _________________________________________________________________________________________________________
